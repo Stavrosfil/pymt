@@ -1,34 +1,46 @@
+import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
 import time
-import pandas as pd
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 
-options = webdriver.ChromeOptions()
-options.add_argument('--ignore-certificate-errors')
-options.add_argument('--incognito')
-options.add_argument('--headless')
-options.add_argument('--no-gpu')
-driver = webdriver.Chrome(
-    "/usr/lib/chromium-browser/chromedriver", chrome_options=options)
+# http://m.oasth.gr/index.php?md=4&sn=3&start=819&sorder=1&rc=2282&line=620&dir=1&ref=1
+url = "http://m.oasth.gr/index.php"
+reqdata = {"md": 4, "sn": 3, "start": 819,
+           "sorder": 1, "rc": 2282, "line": 620, "dir": 1}
 
-driver.get("http://oasth.gr/#en/stopinfo/screen/13011/")
-delay = 10  # seconds
-try:
-    myElem = WebDriverWait(driver, delay).until(
-        EC.presence_of_element_located((By.ID, 'arivals')))
-    print("Page is ready!")
-except TimeoutException:
-    print("Loading took too much time!")
+reqdata2 = {"md": 4, "sn": 3, "start": 922,
+            "sorder": 18, "rc": 2279, "line": 146, "dir": 1}
 
-# URL = "http://oasth.gr/#en/stopinfo/screen/13011/"
-# driver.get(URL)
-# # time.sleep(20)
-# # print(driver.page_source)
-soup = BeautifulSoup(driver.page_source, 'html5lib')
-print(soup.prettify())
+session = requests.Session()
 
-print(soup.find_all('ul', attrs={'class': 'arivals'}))
+arivals = None
+counter = 0
+
+while True:
+    response = session.get(url, params=reqdata, headers={
+                           "X-Requested-With": "XMLHttpRequest"})
+    # response2 = session.get(url, params=reqdata, headers={
+    # "X-Requested-With": "XMLHttpRequest"})
+
+    soup = BeautifulSoup(response.text, 'html5lib')
+    # print(soup.prettify())
+
+    arivals = soup.find_all('div', attrs={'class': 'menu'})
+    if(arivals):
+        print(arivals)
+    else:
+        print('error')
+    # print(soup.find_all('ul', attrs={'class': 'arivals'}))
+
+    # busnames = []
+
+    # for bus in arivals:
+    #     bn = bus.find_all('span', attrs={'class': 'busno'})
+    #     busnames.append(bn, string)
+    counter += 1
+    time.sleep(1)
+    print(counter)
+
+# print(busnames)
+
+# print(response.text)
+# print(response2.text)
