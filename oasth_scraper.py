@@ -25,17 +25,25 @@ while True:
     # print(soup.prettify())
 
     arivals = soup.find_all('div', attrs={'class': 'menu'})
-    if(arivals):
-        print(arivals)
-    else:
-        print('error')
+    print(arivals[0].prettify())
+    bus_names = arivals[0].find_all('span', attrs={'class': 'sp1'})
+    bus_time = arivals[0].find_all('span', attrs={'class': 'sptime'})
+
+    dic = dict([])
+
+    for i in range(len(bus_names)):
+        # dic.append(bus_names[i].text: bus_time[i].text)
+        dic[bus_names[i].text] = bus_time[i].text
+
+    for bus in dic:
+        print(bus + dic[bus])
+    # print(arivals2.prettify())
+    # if(arivals):
+    #     print(arivals2.find_all('span', attrs={'class': 'sp1'}))
+    # else:
+    #     print('error')
     # print(soup.find_all('ul', attrs={'class': 'arivals'}))
 
-    # busnames = []
-
-    # for bus in arivals:
-    #     bn = bus.find_all('span', attrs={'class': 'busno'})
-    #     busnames.append(bn, string)
     counter += 1
     time.sleep(1)
     print(counter)
