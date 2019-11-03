@@ -25,14 +25,6 @@ while True:
     soup = BeautifulSoup(response.text, 'html5lib')
     # print(soup.prettify())
 
-    arivals = soup.find('div', attrs={'class': 'menu'})
-    print(arivals.prettify())
-    bus_names = arivals.find_all('span', attrs={'class': 'sp1'})
-    bus_time = [arival.text for arival in arivals.find_all(
-        'span', attrs={'class': 'sptime'})]
-
-    dic = dict([])
-
     # Example of a bus details payload we receive in HTML.
     # ------------------------------------------------
     #   <h3>
@@ -48,11 +40,20 @@ while True:
     #  </h3>
     # ------------------------------------------------
 
-    for i in range(len(bus_names)):
+    arivals = soup.find('div', attrs={'class': 'menu'})
+    print(arivals.prettify())
+    bus_names = [bus.text for bus in arivals.find_all(
+        'span', attrs={'class': 'sp1'})]
+    bus_times = [arival.text for arival in arivals.find_all(
+        'span', attrs={'class': 'sptime'})]
+
+    dic = dict([])
+
+    for bus_description, bus_time in zip(bus_names, bus_times):
 
         # Split in : and get the bus number (01X).
         # 01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
-        bus_number, bus_name = bus_names[i].text.split(':')
+        bus_number, bus_name = bus_description.split(':')
 
         # Get the second split item and extract the bus description
         # "Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ "
@@ -61,7 +62,7 @@ while True:
         bus_name, bus_id = bus_name.split(' ΟΧΗΜΑ ')
 
         # Delete all the spaces
-        bus_arival = re.search(r'\d+', bus_time[i]).group()
+        bus_arival = re.search(r'\d+', bus_time).group()
 
         dic_key = bus_number + ':' + bus_name
 
