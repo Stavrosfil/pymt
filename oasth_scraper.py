@@ -25,10 +25,11 @@ while True:
     soup = BeautifulSoup(response.text, 'html5lib')
     # print(soup.prettify())
 
-    arivals = soup.find_all('div', attrs={'class': 'menu'})
-    print(arivals[0].prettify())
-    bus_names = arivals[0].find_all('span', attrs={'class': 'sp1'})
-    bus_time = arivals[0].find_all('span', attrs={'class': 'sptime'})
+    arivals = soup.find('div', attrs={'class': 'menu'})
+    print(arivals.prettify())
+    bus_names = arivals.find_all('span', attrs={'class': 'sp1'})
+    bus_time = [arival.text for arival in arivals.find_all(
+        'span', attrs={'class': 'sptime'})]
 
     dic = dict([])
 
@@ -48,18 +49,19 @@ while True:
     # ------------------------------------------------
 
     for i in range(len(bus_names)):
+
         # Split in : and get the bus number (01X).
         # 01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
-        bus_number = bus_names[i].text.split(':')[0]
+        bus_number, bus_name = bus_names[i].text.split(':')
+
         # Get the second split item and extract the bus description
-        # (Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ )
-        # Then delete the last character (space)
-        bus_name = bus_names[i].text.split(':')[1].split('ΟΧΗΜΑ')[0][:-1]
+        # "Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ "
+        # Then delete the trailing space
         # Get the second split item and extract the bus id (0861)
-        bus_id = bus_names[i].text.split(':')[1].split('ΟΧΗΜΑ')[1]
+        bus_name, bus_id = bus_name.split(' ΟΧΗΜΑ ')
+
         # Delete all the spaces
-        bus_id = re.search(r'\d+', bus_id).group()
-        bus_arival = re.search(r'\d+', bus_time[i].text).group()
+        bus_arival = re.search(r'\d+', bus_time[i]).group()
 
         dic_key = bus_number + ':' + bus_name
 
