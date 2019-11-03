@@ -8,8 +8,9 @@ import bs4
 
 # Constants for grabbing
 BASE_URL = "http://m.oasth.gr/index.php"
-REQUEST_DATA = {"md": 4} # 4th menu choice (line arrivals)
-HEADERS = {"X-Requested-With": "XMLHttpRequest"} # OASTH site responds to XHR requests
+REQUEST_DATA = {"md": 4}  # 4th menu choice (line arrivals)
+# OASTH site responds to XHR requests
+HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 
 # Data request
 session = requests.Session()
@@ -31,7 +32,7 @@ for link in line_links:
     # initial form: http://m.oasth.gr/#index.php?md=4&sn=2&line=432&dhm=
     # first split on '?' gets rid of the URL before the parameters
     # second split breaks on '&'s to isolate the parameters
-    # third split breaks on '=' to keep the numbers only, then the list 
+    # third split breaks on '=' to keep the numbers only, then the list
     # comprehension zips the numbers up into a new list and tosses out the
     # last element which is empty
 

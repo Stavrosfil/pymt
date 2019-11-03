@@ -27,6 +27,9 @@ while True:
     soup = BeautifulSoup(response.text, 'html5lib')
     # print(soup.prettify())
 
+    bus_stop = soup.find('div', attrs={'class': 'title'}).text
+    print(bus_stop)
+
     payload_arivals = soup.find('div', attrs={'class': 'menu'})
     # print(payload_arivals.prettify())
 
