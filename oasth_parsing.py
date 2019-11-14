@@ -1,4 +1,25 @@
-import re
+from Bus import Bus
+
+
+def parse_buses(bus_arivals_html):
+    """
+    Parses a given OASTH based HTML string containing the incoming buses and timings.
+    Returns: A list of bus objects.
+    """
+
+    buses_html = [b for b in bus_arivals_html.find_all('h3')]
+
+    print(buses_html)
+
+    parsed_buses = []
+
+    for bus_html in buses_html:
+        parsed_buses.append(parse_bus(bus_html))
+
+    print(parsed_buses)
+
+    return parsed_buses
+
 
 # Example of a bus details payload we receive in HTML.
 # ------------------------------------------------
@@ -16,35 +37,38 @@ import re
 # ------------------------------------------------
 
 
-def parse_buses(payload_arivals):
+def parse_bus(bus_html):
+    """
+    Parses a given OASTH based HTML string containing the incoming bus info and timing.
+    Returns: A bus object.
+    """
 
-    bus_descriptions = [bus.text for bus in payload_arivals.find_all(
-        'span', attrs={'class': 'sp1'})]
-    bus_times = [arival.text for arival in payload_arivals.find_all(
-        'span', attrs={'class': 'sptime'})]
+    # extract text from:
+    # <span class="sp1">
+    #    01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
+    # </span>
+    bus_payload = bus_html.find('span', attrs={'class': 'sp1'}).text
 
-    dic = dict([])
+    # extract timing from:
+    # <span class="sptime">
+    #    52'
+    # </span>
+    # Delete all the spaces trimming the first and two last characters. ' 5' '
+    # arival = re.search(r'\d+', bus_time).group()
+    arival = int(bus_html.find('span', attrs={'class': 'sptime'}).text[1:-2])
 
-    for bus_description, bus_time in zip(bus_descriptions, bus_times):
+    # Split in : and get the bus number (01X).
+    # 01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
+    line_number, line_description = bus_payload.split(':')
 
-        # Split in : and get the bus number (01X).
-        # 01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
-        bus_number, bus_name = bus_description.split(':')
+    # Get the second split item and extract the bus description
+    # "Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ "
+    # Then delete the trailing space
+    # Get the second split item and extract the bus id (0861)
+    line_description, bus_id = line_description.split(' ΟΧΗΜΑ ')
 
-        # Get the second split item and extract the bus description
-        # "Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ "
-        # Then delete the trailing space
-        # Get the second split item and extract the bus id (0861)
-        bus_name, bus_id = bus_name.split(' ΟΧΗΜΑ ')
+    bus_id = int(bus_id)
 
-        # Delete all the spaces
-        bus_arival = re.search(r'\d+', bus_time).group()
+    b = Bus(bus_id, arival, line_description, line_number)
 
-        dic_key = bus_number + ':' + bus_name
-
-        if dic_key in dic:
-            dic[dic_key].append((bus_id, bus_arival))
-        else:
-            dic[dic_key] = [(bus_id, bus_arival)]
-
-    return dic
+    return b
