@@ -5,4 +5,5 @@
         "--max-line-length=120"
     ],
     "python.linting.flake8Enabled": true,
+    "python.pythonPath": "/bin/python3",
 }
