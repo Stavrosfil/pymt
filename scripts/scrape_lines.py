@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import Line as Line
+import json
 
 # --------------------------------- GET DATA --------------------------------- #
 
@@ -12,6 +13,8 @@ session = requests.Session()
 
 response = session.get(base_url, params=reqdata, headers={
     "X-Requested-With": "XMLHttpRequest"})
+
+session.close()
 
 
 # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
@@ -27,15 +30,19 @@ lines = soup.find_all('h3')
 
 # ---------------------------------- PARSING --------------------------------- #
 
-parsed_lines = []
-
 # Extract all the information from each individual line, using Line objects
-for line in lines:
+# parsed_lines.append(Line.Line(line=line, base_url=base_url))
 
-    parsed_lines.append(Line.Line(line=line, base_url=base_url))
+def to_json():
+    parsed_lines = []
+    for line in lines:
+        line = Line.Line(line=line, base_url=base_url)
+        p_line = {'line_id': line.line_id,
+                  'line_number': line.line_number,
+                  'line_description': line.line_description,
+                  'generated_url': line.generated_url}
+        parsed_lines.append(p_line)
+    print(json.dumps(parsed_lines))
 
 
-for i in parsed_lines:
-    print(i.line_id)
-
-session.close()
+to_json()
