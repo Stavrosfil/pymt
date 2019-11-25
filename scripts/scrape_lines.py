@@ -6,7 +6,7 @@ import json
 
 # --------------------------------- GET DATA --------------------------------- #
 
-base_url = "http://m.oasth.gr/index.php"
+base_url = "http://m.oasth.gr/#index.php"
 reqdata = {"md": 4}
 
 session = requests.Session()
@@ -31,18 +31,30 @@ lines = soup.find_all('h3')
 # ---------------------------------- PARSING --------------------------------- #
 
 # Extract all the information from each individual line, using Line objects
-# parsed_lines.append(Line.Line(line=line, base_url=base_url))
+parsed_lines = []
+for line in lines:
+    parsed_lines.append(Line.Line(line=line, base_url=base_url))
 
-def to_json():
-    parsed_lines = []
-    for line in lines:
-        line = Line.Line(line=line, base_url=base_url)
+
+# -------------------------- SAVE DATA TO JSON FILE -------------------------- #
+
+
+def save_to_json():
+
+    of = open("lines.json", "a")
+
+    to_json = []
+
+    for line in parsed_lines:
         p_line = {'line_id': line.line_id,
                   'line_number': line.line_number,
                   'line_description': line.line_description,
                   'generated_url': line.generated_url}
-        parsed_lines.append(p_line)
-    print(json.dumps(parsed_lines))
+        to_json.append(p_line)
+
+    json.dump(to_json, of, indent=2, ensure_ascii=False)
+
+    of.close()
 
 
-to_json()
+save_to_json()
