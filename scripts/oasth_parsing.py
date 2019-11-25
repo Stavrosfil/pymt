@@ -9,32 +9,27 @@ def parse_buses(bus_arivals_html):
 
     buses_html = [b for b in bus_arivals_html.find_all('h3')]
 
-    print(buses_html)
-
-    parsed_buses = []
-
-    for bus_html in buses_html:
-        parsed_buses.append(parse_bus(bus_html))
-
-    print(parsed_buses)
+    parsed_buses = [parse_bus(b) for b in buses_html]
 
     return parsed_buses
 
 
-# Example of a bus details payload we receive in HTML.
-# ------------------------------------------------
-#   <h3>
-#       <span class="sp1">
-#           01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
-#       </span>
-#       <span class="sp2">
-#           ΑΦΙΞΗ ΣΕ
-#           <span class="sptime">
-#               52'
-#           </span>
-#       </span>
-#  </h3>
-# ------------------------------------------------
+"""
+Example of a bus details payload we receive in HTML:
+----------------------------------------------------
+  <h3>
+      <span class="sp1">
+          01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
+      </span>
+      <span class="sp2">
+          ΑΦΙΞΗ ΣΕ
+          <span class="sptime">
+              52'
+          </span>
+      </span>
+ </h3>
+-----------------------------------------------------
+"""
 
 
 def parse_bus(bus_html):
