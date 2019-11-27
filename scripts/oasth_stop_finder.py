@@ -1,35 +1,41 @@
 import requests
-from bs4 import BeautifulSoup
-# import time
+import json
+import Stop as Stop
 
-f = open("oasth_stops.txt", "a")
+
+of = open("oasth_stops.json", "a")
 
 # http://m.oasth.gr/index.php?md=4&sn=3&start=819&sorder=1&rc=2282&line=620&dir=1&ref=1
 url = "http://m.oasth.gr/index.php"
 # reqdata = {"md": 4, "sn": 3, "start": 820,
 #            "sorder": 1, "rc": 2282, "line": 620, "dir": 1}
 
-counter = 0
+stop_id = 1
 
 session = requests.Session()
 
 while True:
 
-    reqdata = {"md": 4, "sn": 3, "start": counter}
+    reqdata = {"md": 4, "sn": 3, "start": stop_id}
 
     response = session.get(url, params=reqdata, headers={
                            "X-Requested-With": "XMLHttpRequest"})
 
-    soup = BeautifulSoup(response.text, 'html5lib')
     # print(soup.prettify())
 
-    bus_stop = soup.find('div', attrs={'class': 'title'}).text
-    print(str(counter) + " \"" + bus_stop + "\"")
+    stop = Stop.Stop(payload=response.text, stop_id=stop_id)
 
-    if(bus_stop != " "):
-        f.write(str(counter) + " " + bus_stop + '\n')
+    if stop.description != '':
 
-    counter += 1
-    # time.sleep(1)
+        print(str(stop_id) + " \"" + stop.description + "\"")
 
-f.close()
+        if(stop.description != " "):
+            json.dump({'stop_id': stop_id, 'stop_description': stop.description},
+                      of, indent=2, ensure_ascii=False)
+            of.write(',\n')
+    else:
+        print(str(stop_id) + " \" Empty \"")
+
+    stop_id += 1
+
+of.close()
