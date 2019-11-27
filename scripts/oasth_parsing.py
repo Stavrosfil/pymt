@@ -1,27 +1,32 @@
 from Bus import Bus
-from Stop import Stop
+import Stop as Stop
+from bs4 import BeautifulSoup
 
 
 # ---------------------------------------------------------------------------- #
 #                                 STOP PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
-def parse_stop(stop_soup, stop_id):
+def parse_stop(payload, stop_id):
 
-    if (stop_soup.find('div', attrs={'class': 'err'}) is None):
-        description = stop_soup.find('div', attrs={'class': 'title'}).text
-        payload_arivals = stop_soup.find('div', attrs={'class': 'menu'})
+    soup = BeautifulSoup(payload, 'html5lib')
+
+    description = soup.find('div', attrs={'class': 'title'}).text
+
+    if (soup.find('div', attrs={'class': 'err'}) is None):
+        payload_arivals = soup.find('div', attrs={'class': 'menu'})
         parsed_buses = parse_buses(payload_arivals)
-        return Stop(stop_id=stop_id, buses=parsed_buses, description=description)
+        return Stop.Stop(stop_id=stop_id, buses=parsed_buses, description=description)
     else:
-        return None
+        # We got no buses in this stop
+        return Stop.Stop(stop_id=stop_id)
 
 
 # ---------------------------------------------------------------------------- #
 #                                  BUS PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
-
+# TODO: use bs4 for every parsing inside the file
 def parse_buses(bus_arivals_html):
     """
     Parses a given OASTH based HTML string containing the incoming buses and timings from a specific Stop.
