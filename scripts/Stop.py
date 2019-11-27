@@ -1,7 +1,8 @@
 class Stop:
 
-    def __init__(self, name='', buses=[], lines=[]):
-        self.name = name
+    def __init__(self, stop_id=-1, description='', buses=[], lines=[]):
+        self.stop_id = stop_id
+        self.description = description
         self.buses = buses
         self.lines = lines
 
