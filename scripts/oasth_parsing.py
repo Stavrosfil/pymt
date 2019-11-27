@@ -1,17 +1,36 @@
 from Bus import Bus
+from Stop import Stop
+
+
+# ---------------------------------------------------------------------------- #
+#                                 STOP PARSING                                 #
+# ---------------------------------------------------------------------------- #
+
+def parse_stop(stop_soup, stop_id):
+
+    if (stop_soup.find('div', attrs={'class': 'err'}) is None):
+        description = stop_soup.find('div', attrs={'class': 'title'}).text
+        payload_arivals = stop_soup.find('div', attrs={'class': 'menu'})
+        parsed_buses = parse_buses(payload_arivals)
+        return Stop(stop_id=stop_id, buses=parsed_buses, description=description)
+    else:
+        return None
+
+
+# ---------------------------------------------------------------------------- #
+#                                  BUS PARSING                                 #
+# ---------------------------------------------------------------------------- #
 
 
 def parse_buses(bus_arivals_html):
     """
-    Parses a given OASTH based HTML string containing the incoming buses and timings.
+    Parses a given OASTH based HTML string containing the incoming buses and timings from a specific Stop.
     Returns: A list of bus objects.
     """
 
     buses_html = [b for b in bus_arivals_html.find_all('h3')]
 
-    parsed_buses = [parse_bus(b) for b in buses_html]
-
-    return parsed_buses
+    return [parse_bus(b) for b in buses_html]
 
 
 """
@@ -34,7 +53,7 @@ Example of a bus details payload we receive in HTML:
 
 def parse_bus(bus_html):
     """
-    Parses a given OASTH based HTML string containing the incoming bus info and timing.
+    Parses a given OASTH based HTML string containing the incoming bus info and timing from a specific Stop.
     Returns: A bus object.
     """
 
@@ -64,6 +83,4 @@ def parse_bus(bus_html):
 
     bus_id = int(bus_id)
 
-    b = Bus(bus_id, arival, line_description, line_number)
-
-    return b
+    return Bus(bus_id, arival, line_description, line_number)
