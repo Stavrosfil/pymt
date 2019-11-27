@@ -3,36 +3,32 @@ from bs4 import BeautifulSoup
 import json
 import re
 import oasth_parsing as oasth_parser
+import async_requests
 # import time
 
-of = open("stop_info.json", "a")
-
-base_url = "http://m.oasth.gr/#index.php"
-
-session = requests.Session()
+of = open("stop_info_async.json", "a")
 
 with open("oasth_stops.txt", "r") as f:
 
+    stop_ids = []
+
     # TODO: Convert oasth_stops.txt file to a json one for better data handling.
     for line in f:
-
-        # --------------------------------- GET DATA --------------------------------- #
-
         stop_id = re.search(r'\d+', line).group()
-
         print(f'Stop ID: { str(stop_id) }')
+        stop_ids.append(stop_id)
 
-        reqdata = {"md": 4, "sn": 3, "start": stop_id}
+    responses = async_requests.get_stops(stop_ids)
+    # print(responses)
 
-        response = session.get(base_url, params=reqdata, headers={
-                               "X-Requested-With": "XMLHttpRequest"})
+    # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
 
-        # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
+    soups = [BeautifulSoup(response, 'html5lib') for response in responses]
+    # print(soup.prettify())
 
-        soup = BeautifulSoup(response.text, 'html5lib')
-        # print(soup.prettify())
+    # ---------------------------------- PARSING --------------------------------- #
 
-        # ---------------------------------- PARSING --------------------------------- #
+    for soup in soups:
 
         if (soup.find('div', attrs={'class': 'err'}) is None):
 
