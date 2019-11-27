@@ -19,7 +19,7 @@ def parse_stop(payload, stop_id):
         return Stop.Stop(stop_id=stop_id, buses=parsed_buses, description=description)
     else:
         # We got no buses in this stop
-        return Stop.Stop(stop_id=stop_id)
+        return Stop.Stop(stop_id=stop_id, description=description)
 
 
 # ---------------------------------------------------------------------------- #

@@ -25,16 +25,12 @@ while True:
 
     stop = Stop.Stop(payload=response.text, stop_id=stop_id)
 
-    if stop.description != '':
+    print(str(stop_id) + " \"" + stop.description + "\"")
 
-        print(str(stop_id) + " \"" + stop.description + "\"")
-
-        if(stop.description != " "):
-            json.dump({'stop_id': stop_id, 'stop_description': stop.description},
-                      of, indent=2, ensure_ascii=False)
-            of.write(',\n')
-    else:
-        print(str(stop_id) + " \" Empty \"")
+    if(stop.description != " "):
+        json.dump({'stop_id': stop_id, 'stop_description': stop.description},
+                  of, indent=2, ensure_ascii=False)
+        of.write(',\n')
 
     stop_id += 1
 
