@@ -3,17 +3,18 @@ from bs4 import BeautifulSoup
 import re
 import Line as Line
 import json
+from pathlib import Path
+
+DATA_FOLDER = Path("data")
 
 # --------------------------------- GET DATA --------------------------------- #
 
-base_url = "http://m.oasth.gr/#index.php"
-reqdata = {"md": 4}
+BASE_URL = "http://m.oasth.gr/#index.php"
+PARAMS = {"md": 4}
+HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 
 session = requests.Session()
-
-response = session.get(base_url, params=reqdata, headers={
-    "X-Requested-With": "XMLHttpRequest"})
-
+response = session.get(BASE_URL, params=PARAMS, headers=HEADERS)
 session.close()
 
 
@@ -33,7 +34,7 @@ lines = soup.find_all('h3')
 # Extract all the information from each individual line, using Line objects
 parsed_lines = []
 for line in lines:
-    parsed_lines.append(Line.Line(line=line, base_url=base_url))
+    parsed_lines.append(Line.Line(line=line, base_url=BASE_URL))
 
 
 # -------------------------- SAVE DATA TO JSON FILE -------------------------- #
@@ -41,20 +42,20 @@ for line in lines:
 
 def save_to_json():
 
-    of = open("lines.json", "a")
+    with open(DATA_FOLDER / "lines.json", "a") as of:
 
-    to_json = []
+        to_json = []
 
-    for line in parsed_lines:
-        p_line = {'line_id': line.line_id,
-                  'line_number': line.line_number,
-                  'line_description': line.line_description,
-                  'generated_url': line.generated_url}
-        to_json.append(p_line)
+        for line in parsed_lines:
+            p_line = {'line_id': line.line_id,
+                      'line_number': line.line_number,
+                      'line_description': line.line_description,
+                      'generated_url': line.generated_url}
+            to_json.append(p_line)
 
-    json.dump(to_json, of, indent=2, ensure_ascii=False)
+        json.dump(to_json, of, indent=2, ensure_ascii=False)
 
-    of.close()
+        of.close()
 
 
 save_to_json()
