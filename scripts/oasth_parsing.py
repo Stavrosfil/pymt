@@ -1,6 +1,8 @@
 from Bus import Bus
 import Stop as Stop
+import Line as Line
 from bs4 import BeautifulSoup
+import re
 
 
 # ---------------------------------------------------------------------------- #
@@ -89,3 +91,40 @@ def parse_bus(bus_html):
     bus_id = int(bus_id)
 
     return Bus(bus_id, arival, line_description, line_number)
+
+
+# ---------------------------------------------------------------------------- #
+#                                 LINE PARSING                                 #
+# ---------------------------------------------------------------------------- #
+
+def parse_line(self, line):
+    """
+    Parses the given soup object and extracts line details.
+
+    Arguments:
+        line {soup object} -- A soup object parsed from the website response containing the tag <h3>
+
+    Example object:
+        <h3>
+            <a href = "http://m.oasth.gr/#index.php?md=4&amp;sn=2&amp;line=250&amp;dhm=">
+                <span class = "sp1">
+                    92R
+                </span>
+                <span class = "sp2">
+                    ΚΟΥΦΑΛΙΑ - ΡΑΧΩΝΑ
+                </span>
+            </a>
+        </h3>
+    """
+
+    self.href = line.find('a', href=True).get('href')
+    self.line_id = int(re.search(r'line=\d+', self.href).group()[5:])
+    self.sn = re.search(r'sn=\d+', self.href).group()[3:]
+    self.line_number = line.find('span', attrs={'class': 'sp1'}).text
+    self.line_description = line.find('span', attrs={'class': 'sp2'}).text
+
+    # return Line(href=href,
+    # line_id=line_id,
+    # sn=sn,
+    # line_number=line_number,
+    # line_description=line_description)
