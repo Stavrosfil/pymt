@@ -1,10 +1,13 @@
-import requests
-from bs4 import BeautifulSoup
-import json
+import sys
 import re
-import oasth_parsing as oasth_parser
-import async_requests
+import json
+from bs4 import BeautifulSoup
+import requests
 import Stop
+import async_requests
+import oasth_parsing as oasth_parser
+sys.path.append('/home/stavrosfil/repos/pymt/scripts/modules')
+
 # import time
 
 of = open("stop_info_async.json", "a")

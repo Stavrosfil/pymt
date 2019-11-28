@@ -1,6 +1,7 @@
+import Stop as Stop
 import requests
 import json
-import Stop as Stop
+sys.path.append('/home/stavrosfil/repos/pymt/scripts/modules')
 
 
 of = open("oasth_stops.json", "a")
