@@ -1,41 +1,45 @@
+from pathlib import Path
 import sys
 import re
 import json
-from bs4 import BeautifulSoup
 import requests
-import Stop
 import async_requests
-import oasth_parsing as oasth_parser
+import Stop as Stop
 sys.path.append('/home/stavrosfil/repos/pymt/scripts/modules')
 
 # import time
 
-of = open("stop_info_async.json", "a")
 
-with open("oasth_stops.txt", "r") as f:
+data_folder = Path("data")
+
+od = data_folder / "stop_info_async.json"
+
+of = open(od, "a")
+
+# of = open("/data/stop_info_async.json", "a")
+
+with open('oasth_stops.json') as f:
 
     stop_ids = []
 
+    data = json.load(f)
+
     # TODO: Convert oasth_stops.txt file to a json one for better data handling.
-    for line in f:
-        stop_id = re.search(r'\d+', line).group()
+    for d in data:
         # print(f'Stop ID: { str(stop_id) }')
-        stop_ids.append(stop_id)
+        stop_ids.append(d["stop_id"])
+
+    # stop_ids = stop_ids[0:50]
 
     responses = async_requests.get_stops(stop_ids)
-
-    # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
-
-    stop_soups = [BeautifulSoup(response, 'html5lib')
-                  for response in responses]
 
     # ---------------------------------- PARSING --------------------------------- #
 
     of.write('[')
 
-    for stop_soup, stop_id in zip(stop_soups, stop_ids):
+    for response, stop_id in zip(responses, stop_ids):
 
-        stop = oasth_parser.parse_stop(stop_soup, stop_id)
+        stop = Stop.Stop(response, stop_id)
 
         if(stop is not None):
 
@@ -50,3 +54,4 @@ with open("oasth_stops.txt", "r") as f:
                 of.write(',')
 
 f.close()
+of.close()
