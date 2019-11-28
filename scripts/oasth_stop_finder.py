@@ -27,7 +27,7 @@ while True:
 
     print(str(stop_id) + " \"" + stop.description + "\"")
 
-    if(stop.description != " "):
+    if(stop.description != ''):
         json.dump({'stop_id': stop_id, 'stop_description': stop.description},
                   of, indent=2, ensure_ascii=False)
         of.write(',\n')

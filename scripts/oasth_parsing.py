@@ -11,7 +11,7 @@ def parse_stop(payload, stop_id):
 
     soup = BeautifulSoup(payload, 'html5lib')
 
-    description = soup.find('div', attrs={'class': 'title'}).text
+    description = soup.find('div', attrs={'class': 'title'}).text[:-1]
 
     if (soup.find('div', attrs={'class': 'err'}) is None):
         payload_arivals = soup.find('div', attrs={'class': 'menu'})
