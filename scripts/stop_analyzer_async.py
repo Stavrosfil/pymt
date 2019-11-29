@@ -4,8 +4,7 @@ import re
 import json
 import requests
 import async_requests
-import Stop as Stop
-sys.path.append('/home/stavrosfil/repos/pymt/scripts/modules')
+from modules import Stop as Stop
 
 
 DATA_FOLDER = Path("data")
@@ -23,7 +22,7 @@ with open(DATA_FOLDER / "oasth_stops.json", "r") as f:
 
 with open(DATA_FOLDER / "stop_info_async.json", "a") as of:
 
-    # stop_ids = stop_ids[0:50]
+    stop_ids = stop_ids[0:50]
 
     responses = async_requests.get_stops(stop_ids)
     of.write('[')
@@ -34,8 +33,10 @@ with open(DATA_FOLDER / "stop_info_async.json", "a") as of:
 
         if(stop is not None):
             of.write('\n')
+
             stop_json = {'stop_id': stop.stop_id,
                          'buses': [b.__dict__ for b in stop.buses]}
+
             json.dump(stop_json, of, indent=2, ensure_ascii=False)
             if (stop_id != stop_ids[-1]):
                 of.write(',')

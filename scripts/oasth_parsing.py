@@ -1,6 +1,6 @@
-from Bus import Bus
-import Stop as Stop
-import Line as Line
+from modules import Bus as Bus
+from modules import Stop as Stop
+from modules import Line as Line
 from bs4 import BeautifulSoup
 import re
 
@@ -90,7 +90,7 @@ def parse_bus(bus_html):
 
     bus_id = int(bus_id)
 
-    return Bus(bus_id, arival, line_description, line_number)
+    return Bus.Bus(bus_id, arival, line_description, line_number)
 
 
 # ---------------------------------------------------------------------------- #
