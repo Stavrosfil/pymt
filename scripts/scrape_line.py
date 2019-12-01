@@ -4,9 +4,9 @@ import re
 from modules import Line as Line
 import json
 from pathlib import Path
-from requests_html import HTMLSession
 from selenium import webdriver
 import selenium as se
+import time
 
 
 DATA_FOLDER = Path("data")
@@ -35,14 +35,9 @@ options = se.webdriver.ChromeOptions()
 options.add_argument('headless')
 driver = se.webdriver.Chrome(options=options)
 driver.get(generated_url)
+time.sleep(0.5)
+print(driver.page_source)
 
-
-with HTMLSession() as session:
-    response = session.get(generated_url)
-    print(response)
-    response.html.render()
-    print(driver.page_source)
-    session.close()
 
 # print(response.html.html)
 # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
