@@ -101,8 +101,31 @@ def parse_bus(bus_html):
 #                                 LINE PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
-def parse_line_stops(self, payload):
-    pass
+def parse_line_stops(payload):
+    soup = BeautifulSoup(payload, 'html5lib')
+    # print(soup.prettify())
+
+    # We get two menu divisions: start  -> dest
+    #                            dest   -> start
+    # This time the importand info is loaded with js, and is found under the 'menu' tag
+    # The only difference is that we discard the first menu division, because it belongs to the unloaded page.
+    line_directions = soup.find_all('div', attrs={'class': 'menu'})[1:]
+
+    parsed_stops = []
+
+    # Get all the individual stops for each direction.
+    for direction in line_directions:
+        stops = direction.find_all('h3')
+        for stop in stops:
+            # !: We must remove '#' from the url or the urlparse lib will not work properly.
+            href = stop.find('a', href=True).get('href').replace('#', '')
+            index = stop.find('span', attrs={'class': 'sp2'}).text
+            name = stop.find('span', attrs={'class': 'spt'}).text
+
+            print(href, index, name)
+            parsed_stops.append(Stop.Stop(url=href, name=name))
+
+    return parsed_stops
 
 
 def parse_line(self, line):
