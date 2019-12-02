@@ -13,13 +13,7 @@ class Stop:
                 stop_html {BeautifulSoup} -- [the payload received from the server]
             """
 
-            stop = oasth_parser.parse_stop(payload, stop_id)
-
-            # Deep copy
-            self.stop_id = stop.stop_id
-            self.description = stop.description
-            self.buses = stop.buses
-            self.lines = stop.lines
+            stop = oasth_parser.parse_stop(self, payload, stop_id)
 
         else:
             self.stop_id = stop_id

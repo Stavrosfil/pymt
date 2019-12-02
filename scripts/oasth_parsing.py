@@ -9,26 +9,30 @@ import re
 #                                 STOP PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
-def parse_stop(payload, stop_id):
+def parse_stop(self, payload, stop_id):
 
     soup = BeautifulSoup(payload, 'html5lib')
 
     description = soup.find('div', attrs={'class': 'title'}).text[:-1]
 
+    self.buses = []
+
+    # If we got buses in this stop
     if (soup.find('div', attrs={'class': 'err'}) is None):
         payload_arivals = soup.find('div', attrs={'class': 'menu'})
         parsed_buses = parse_buses(payload_arivals)
-        return Stop.Stop(stop_id=stop_id, buses=parsed_buses, description=description)
-    else:
-        # We got no buses in this stop
-        return Stop.Stop(stop_id=stop_id, description=description)
+        self.buses = parsed_buses
 
+    self.stop_id = stop_id
+    self.description = description
 
 # ---------------------------------------------------------------------------- #
 #                                  BUS PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
 # TODO: use bs4 for every parsing inside the file
+
+
 def parse_buses(bus_arivals_html):
     """
     Parses a given OASTH based HTML string containing the incoming buses and timings from a specific Stop.
@@ -96,6 +100,10 @@ def parse_bus(bus_html):
 # ---------------------------------------------------------------------------- #
 #                                 LINE PARSING                                 #
 # ---------------------------------------------------------------------------- #
+
+def parse_line_stops(self, payload):
+    pass
+
 
 def parse_line(self, line):
     """
