@@ -13,7 +13,7 @@ def parse_stop(self, payload, stop_id):
 
     soup = BeautifulSoup(payload, 'html5lib')
 
-    description = soup.find('div', attrs={'class': 'title'}).text[:-1]
+    name = soup.find('div', attrs={'class': 'title'}).text[:-1]
 
     self.buses = []
 
@@ -24,7 +24,7 @@ def parse_stop(self, payload, stop_id):
         self.buses = parsed_buses
 
     self.stop_id = stop_id
-    self.description = description
+    self.name = name
 
 # ---------------------------------------------------------------------------- #
 #                                  BUS PARSING                                 #

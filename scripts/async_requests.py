@@ -2,6 +2,9 @@ import asyncio
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
+BASE_URL = "http://m.oasth.gr/#index.php"
+HEADERS = {"X-Requested-With": "XMLHttpRequest"}
+
 
 async def fetch(url, params, session):
     async with session.get(url, params=params) as response:
@@ -9,20 +12,17 @@ async def fetch(url, params, session):
 
 
 async def run(stop_ids):
-    url = "http://m.oasth.gr/#index.php"
     tasks = []
-    headers = {"X-Requested-With": "XMLHttpRequest"}
-    data_to_request = []
+    to_request = []
 
     for stop_id in stop_ids:
-        reqdata = {"md": 4, "sn": 3, "start": stop_id}
-        data_to_request.append(reqdata)
+        to_request.append({"md": 4, "sn": 3, "start": stop_id})
 
-        # Fetch all responses within one Client session,
-        # keep connection alive for all requests.
-    async with ClientSession(headers=headers) as session:
-        for params in data_to_request:
-            task = asyncio.ensure_future(fetch(url, params, session))
+    # Fetch all responses within one Client session,
+    # keep connection alive for all requests.
+    async with ClientSession(headers=HEADERS) as session:
+        for params in to_request:
+            task = asyncio.ensure_future(fetch(BASE_URL, params, session))
             tasks.append(task)
 
         responses = await asyncio.gather(*tasks)
@@ -43,6 +43,3 @@ def get_stops(stop_ids):
     done = loop.run_until_complete(future)
     # print_responses(done)
     return done
-
-
-# get_stops([817])

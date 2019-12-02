@@ -3,7 +3,7 @@ import oasth_parsing as oasth_parser
 
 class Stop:
 
-    def __init__(self, payload=None, stop_id=-1, description='', buses=[], lines=[]):
+    def __init__(self, payload=None, url=None, stop_id=-1, name='', buses=[], lines=[]):
 
         if payload is not None:
             """
@@ -16,8 +16,9 @@ class Stop:
             stop = oasth_parser.parse_stop(self, payload, stop_id)
 
         else:
+            self.url = url
             self.stop_id = stop_id
-            self.description = description
+            self.name = name
             self.buses = buses
             self.lines = lines
 

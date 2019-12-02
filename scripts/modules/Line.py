@@ -5,12 +5,13 @@ import oasth_parsing as oasth_parser
 
 class Line:
 
-    def __init__(self, line=None, base_url=None, line_id=0, href="", sn=0, generated_url="", line_number=""):
+    def __init__(self, line=None, stops=None, base_url=None, line_id=0, href="", sn=0, generated_url="", line_number=""):
         self.line_id = line_id
         self.href = href
         self.sn = sn
         self.generated_url = generated_url
         self.line_number = line_number
+        self.stops = stops
 
         if line is not None:
             oasth_parser.parse_line(self, line=line)
