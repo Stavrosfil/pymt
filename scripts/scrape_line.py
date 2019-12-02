@@ -2,11 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from modules import Line as Line
+from modules import Stop as Stop
 import json
 from pathlib import Path
 from selenium import webdriver
 import selenium as se
 import time
+from urllib.parse import urlparse, parse_qs
 
 
 DATA_FOLDER = Path("data")
@@ -37,14 +39,13 @@ driver = se.webdriver.Chrome(options=options)
 driver.get(generated_url)
 time.sleep(0.5)
 response = driver.page_source
-# print(response)
 driver.close()
 
 
 # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
 
 soup = BeautifulSoup(response, 'html5lib')
-print(soup.prettify())
+# print(soup.prettify())
 
 # We get two menu divisions: start  -> dest
 #                            dest   -> start
@@ -52,37 +53,48 @@ print(soup.prettify())
 # The only difference is that we discard the first menu division, because it belongs to the unloaded page.
 line_directions = soup.find_all('div', attrs={'class': 'menu'})[1:]
 
-d1, d2 = [], []
+parsed_stops = []
 
 # Get all the individual stops for each direction.
 for direction in line_directions:
     stops = direction.find_all('h3')
     for stop in stops:
-        href = stop.find('a', href=True).get('href')
+        # !: We must remove '#' from the url or the urlparse lib will not work properly.
+        href = stop.find('a', href=True).get('href').replace('#', '')
         index = stop.find('span', attrs={'class': 'sp2'}).text
-        title = stop.find('span', attrs={'class': 'spt'}).text
-        print(href, index, title)
+        name = stop.find('span', attrs={'class': 'spt'}).text
 
+        print(href, index, name)
+        parsed_stops.append(Stop.Stop(url=href, name=name))
+
+# print(parsed_stops)
 
 # -------------------------- SAVE DATA TO JSON FILE -------------------------- #
 
 
-# def save_to_json():
+def save_to_json():
 
-#     with open(DATA_FOLDER / "lines.json", "a") as of:
+    with open(DATA_FOLDER / "test.json", "a") as of:
 
-#         to_json = []
+        to_json = []
 
-#         for line in parsed_lines:
-#             p_line = {'line_id': line.line_id,
-#                       'line_number': line.line_number,
-#                       'line_description': line.line_description,
-#                       'generated_url': line.generated_url}
-#             to_json.append(p_line)
+        for stop in parsed_stops:
 
-#         json.dump(to_json, of, indent=2, ensure_ascii=False)
+            parsed_url = urlparse(str(href))
+            stop_id = parse_qs(parsed_url.query)['start'][0]
+            index = parse_qs(parsed_url.query)['sorder'][0]
+            direction = parse_qs(parsed_url.query)['dir'][0]
 
-#         of.close()
+            p_line = {'stop_id': stop_id,
+                      'index': index,
+                      'dir': direction,
+                      'stop_url': stop.url,
+                      'stop_name': stop.name, }
+            to_json.append(p_line)
+
+        json.dump(to_json, of, indent=2, ensure_ascii=False)
+
+        of.close()
 
 
-# save_to_json()
+save_to_json()
