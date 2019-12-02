@@ -36,29 +36,32 @@ options.add_argument('headless')
 driver = se.webdriver.Chrome(options=options)
 driver.get(generated_url)
 time.sleep(0.5)
-print(driver.page_source)
+response = driver.page_source
+# print(response)
+driver.close()
 
 
-# print(response.html.html)
 # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
 
-# soup = BeautifulSoup(response.html.html, 'html5lib')
-# # print(soup.prettify())
+soup = BeautifulSoup(response, 'html5lib')
+print(soup.prettify())
 
-# # We get two menu divisions: start  -> dest
-# #                            dest   -> start
-# line_directions = soup.find_all('div', attrs={'class': 'menu'})
+# We get two menu divisions: start  -> dest
+#                            dest   -> start
+# This time the importand info is loaded with js, and is found under the 'menu' tag
+# The only difference is that we discard the first menu division, because it belongs to the unloaded page.
+line_directions = soup.find_all('div', attrs={'class': 'menu'})[1:]
 
-# d1, d2 = [], []
+d1, d2 = [], []
 
-# # Get all the individual stops for each direction.
-# for direction in line_directions:
-#     stops = direction.find_all('h3')
-#     for stop in stops:
-#         href = stop.find('a', href=True).get('href')
-#         index = stop.find('span', attrs={'class': 'sp2'})
-#         title = stop.find('span', attrs={'class': 'spt'})
-#         print(href, index, title)
+# Get all the individual stops for each direction.
+for direction in line_directions:
+    stops = direction.find_all('h3')
+    for stop in stops:
+        href = stop.find('a', href=True).get('href')
+        index = stop.find('span', attrs={'class': 'sp2'}).text
+        title = stop.find('span', attrs={'class': 'spt'}).text
+        print(href, index, title)
 
 
 # -------------------------- SAVE DATA TO JSON FILE -------------------------- #
