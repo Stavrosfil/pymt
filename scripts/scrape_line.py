@@ -5,8 +5,6 @@ from modules import Line as Line
 from modules import Stop as Stop
 import json
 from pathlib import Path
-from selenium import webdriver
-import selenium as se
 import time
 from urllib.parse import urlparse, parse_qs
 
@@ -27,31 +25,25 @@ Example json line object
 
 # --------------------------------- GET DATA --------------------------------- #
 
-# BASE_URL = "http://m.oasth.gr/#index.php"
-# PARAMS = {"md": 4}
+BASE_URL = "http://m.oasth.gr/index.php"
 HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-generated_url = 'http://m.oasth.gr/#index.php?md=4&sn=2&line=146&dhm=&f=1'
+PARAMS = {'md': 4, 'sn': 2, 'line': 146, 'dhm': '&', 'f': 1}
+# generated_url = 'http://m.oasth.gr/#index.php?md=4&sn=2&line=146&dhm=&f=1'
 
-
-options = se.webdriver.ChromeOptions()
-options.add_argument('headless')
-driver = se.webdriver.Chrome(options=options)
-driver.get(generated_url)
-time.sleep(0.5)
-response = driver.page_source
-driver.close()
-
+session = requests.Session()
+response = session.get(BASE_URL, params=PARAMS, headers=HEADERS).text
+session.close()
 
 # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
 
 soup = BeautifulSoup(response, 'html5lib')
-# print(soup.prettify())
+print(soup.prettify())
 
 # We get two menu divisions: start  -> dest
 #                            dest   -> start
 # This time the importand info is loaded with js, and is found under the 'menu' tag
 # The only difference is that we discard the first menu division, because it belongs to the unloaded page.
-line_directions = soup.find_all('div', attrs={'class': 'menu'})[1:]
+line_directions = soup.find_all('div', attrs={'class': 'menu'})
 
 parsed_stops = []
 
@@ -64,8 +56,19 @@ for direction in line_directions:
         index = stop.find('span', attrs={'class': 'sp2'}).text
         name = stop.find('span', attrs={'class': 'spt'}).text
 
-        print(href, index, name)
-        parsed_stops.append(Stop.Stop(url=href, name=name))
+        parsed_url = parse_qs(urlparse(str(href)).query)
+        params = {}
+
+        params['md'] = parsed_url['md'][0]
+        params['sn'] = parsed_url['sn'][0]
+        params['start'] = parsed_url['start'][0]
+        params['sorder'] = parsed_url['sorder'][0]
+        params['rc'] = parsed_url['rc'][0]
+        params['line'] = parsed_url['line'][0]
+        params['dir'] = parsed_url['dir'][0]
+
+        print(params, name)
+        parsed_stops.append(Stop.Stop(params=params, name=name))
 
 # print(parsed_stops)
 
@@ -80,16 +83,8 @@ def save_to_json():
 
         for stop in parsed_stops:
 
-            parsed_url = urlparse(str(href))
-            stop_id = parse_qs(parsed_url.query)['start'][0]
-            index = parse_qs(parsed_url.query)['sorder'][0]
-            direction = parse_qs(parsed_url.query)['dir'][0]
-
-            p_line = {'stop_id': stop_id,
-                      'index': index,
-                      'dir': direction,
-                      'stop_url': stop.url,
-                      'stop_name': stop.name, }
+            p_line = {'stop_name': stop.name,
+                      'params': stop.params, }
             to_json.append(p_line)
 
         json.dump(to_json, of, indent=2, ensure_ascii=False)
