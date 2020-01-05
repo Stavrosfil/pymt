@@ -5,6 +5,7 @@ import json
 import requests
 import async_requests
 from modules import Stop as Stop
+import time
 
 from datetime import datetime
 
@@ -24,7 +25,7 @@ def main():
     stop_ids = []
 
     try:
-        print(">>> Opening line data file...")
+        print("\n>>> Opening line data file...")
         with open(DATA_FOLDER / "test.json", "r") as f:
 
             for stop in json.load(f):
@@ -49,14 +50,16 @@ def main():
 
 def saveToInflux(client, stop_ids):
 
-    print(">>> Quering async requests to server...")
-
     # stop_ids = stop_ids[0:50]
 
+    print("\n>>> Quering async requests to server...")
+    time1 = time.time()
     responses = async_requests.get_stops(stop_ids)
+    print("Received {} responses in {} seconds".format(
+        len(responses), time.time() - time1))
 
-    print("Received {} responses".format(len(responses)))
-    print(">>> Writing data to influxdb server...")
+    print("\n>>> Writing data to influxdb server...")
+    time2 = time.time()
 
     for response, stop_id in zip(responses, stop_ids):
 
@@ -86,7 +89,7 @@ def saveToInflux(client, stop_ids):
                 except Exception as e:
                     print("There was an error writing to the database: {}".format(e))
 
-    print("Files successfully written!")
+    print("Files successfully written in {} seconds".format(time.time() - time2))
 
 
 if __name__ == '__main__':
