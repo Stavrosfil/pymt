@@ -17,13 +17,13 @@ A script to analyze a selected stop and output the data to an InfluxDB server.
 TODO: Input is a line or a stop?
 '''
 
+stop_ids = []
+stop_dirs = []
+
 
 def main():
 
     DATA_FOLDER = Path("data")
-
-    stop_ids = []
-    # stop_dirs = []
 
     try:
         print("\n>>> Opening line data file...")
@@ -31,7 +31,7 @@ def main():
 
             for stop in json.load(f):
                 stop_ids.append(stop["params"]["start"])
-                # stop_dirs.append(stop["params"]["dir"])
+                stop_dirs.append(stop["params"]["dir"])
 
                 # print(f'Stop ID: { str(stop_ids[-1]) }')
 
@@ -47,10 +47,16 @@ def main():
     client.switch_database('bustests')
     # print(client.get_list_database())
 
-    saveToInflux(client, stop_ids)
+    loop_timer = time.time()
+
+    while True:
+
+        saveToInflux(client)
+
+        time.sleep(32.0 - ((time.time() - loop_timer) % 32.0))
 
 
-def saveToInflux(client, stop_ids):
+def saveToInflux(client):
 
     # stop_ids = stop_ids[0:50]
 
@@ -65,7 +71,7 @@ def saveToInflux(client, stop_ids):
 
     json_body = []
 
-    for response, stop_id in zip(responses, stop_ids):
+    for response, stop_id, direction in zip(responses, stop_ids, stop_dirs):
 
         stop = Stop.Stop(response, stop_id)
 
@@ -80,7 +86,7 @@ def saveToInflux(client, stop_ids):
                             "bus_id": bus.bus_id,
                             "line_number": bus.line_number,
                             "stop_id": stop_id,
-                            # "direction": direction
+                            "direction": direction
                         },
                         "time": bus.timestamp,
                         "fields": {
