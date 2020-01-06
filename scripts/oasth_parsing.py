@@ -3,6 +3,7 @@ from modules import Stop as Stop
 from modules import Line as Line
 from bs4 import BeautifulSoup
 import re
+import time
 
 
 # ---------------------------------------------------------------------------- #
@@ -94,7 +95,10 @@ def parse_bus(bus_html):
 
     bus_id = int(bus_id)
 
-    return Bus.Bus(bus_id, arival, line_description, line_number)
+    # Use the current time to correctly input the bus to the database
+    timestamp = time.time_ns()
+
+    return Bus.Bus(bus_id, arival, line_description, line_number, timestamp)
 
 
 # ---------------------------------------------------------------------------- #

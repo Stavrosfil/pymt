@@ -23,6 +23,7 @@ def main():
     DATA_FOLDER = Path("data")
 
     stop_ids = []
+    # stop_dirs = []
 
     try:
         print("\n>>> Opening line data file...")
@@ -30,6 +31,7 @@ def main():
 
             for stop in json.load(f):
                 stop_ids.append(stop["params"]["start"])
+                # stop_dirs.append(stop["params"]["dir"])
 
                 # print(f'Stop ID: { str(stop_ids[-1]) }')
 
@@ -61,6 +63,8 @@ def saveToInflux(client, stop_ids):
     print("\n>>> Writing data to influxdb server...")
     time2 = time.time()
 
+    json_body = []
+
     for response, stop_id in zip(responses, stop_ids):
 
         stop = Stop.Stop(response, stop_id)
@@ -69,25 +73,27 @@ def saveToInflux(client, stop_ids):
 
             for bus in stop.buses:
 
-                json_body = {
-                    "measurement": "busArival",
-                    "tags": {
-                        "bus_id": bus.bus_id,
-                        "line_number": bus.line_number,
-                        "stop_id": stop.stop_id
-                    },
-                    # "time": current_time,
-                    "fields": {
-                        "estimated_arival": bus.arival
+                json_body.append(
+                    {
+                        "measurement": "busArival",
+                        "tags": {
+                            "bus_id": bus.bus_id,
+                            "line_number": bus.line_number,
+                            "stop_id": stop_id,
+                            # "direction": direction
+                        },
+                        "time": bus.timestamp,
+                        "fields": {
+                            "estimated_arival": bus.arival
+                        }
                     }
-                }
+                )
 
-                json_body = [json_body, ]
-
-                try:
-                    client.write_points(json_body)
-                except Exception as e:
-                    print("There was an error writing to the database: {}".format(e))
+    try:
+        client.write_points(json_body)
+        # print(json_body)
+    except Exception as e:
+        print("There was an error writing to the database: {}".format(e))
 
     print("Files successfully written in {} seconds".format(time.time() - time2))
 
