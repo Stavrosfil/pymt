@@ -49,7 +49,7 @@ def connect(database):
     return r
 
 
-def create_hash(r, stops):
+def save_stops(r, stops, line):
     """Creates all the required hashes for stop info storage
 
     Arguments:
@@ -58,21 +58,49 @@ def create_hash(r, stops):
 
     for stop in stops:
 
-        uid = 's{}'.format(stop.uid)
+        # e.g 's819': Stop 819
+        suid = 's{}'.format(stop.uid)
         params = stop.params
 
-        r.hset(uid, 'name',     stop.name)
-        r.hset(uid, 'md',       params['md'])
-        r.hset(uid, 'sn',       params['sn'])
-        r.hset(uid, 'start',    params['start'])
-        r.hset(uid, 'sorder',   params['sorder'])
-        r.hset(uid, 'rc',       params['rc'])
-        r.hset(uid, 'line',     params['line'])
-        r.hset(uid, 'dir',      params['dir'])
+        # Add parameters to the s prefixed hash.
+        r.hset(suid, 'name',     stop.name)
+        r.hset(suid, 'md',       params['md'])
+        r.hset(suid, 'sn',       params['sn'])
+        r.hset(suid, 'start',    params['start'])
+        r.hset(suid, 'sorder',   params['sorder'])
+        r.hset(suid, 'rc',       params['rc'])
+        r.hset(suid, 'line',     params['line'])
+        r.hset(suid, 'dir',      params['dir'])
+
+        # e.g. 'l819': Lines for stop 819
+        luid = 'l{}'.format(stop.uid)
+
+        # Add available lines to the 'l' prefixed hash.
+        r.hset(luid, str(line.uid), params['sorder'])
 
 
-def save(stops):
+def save_lines(r, lines):
+
+    for line in lines:
+
+        # e.g. 'l02k': Line O2K
+        luid = 'l{}'.format(line.number)
+        params = line.params
+
+        # Add parameters to the hash
+        r.hset(luid, 'uid',     line.uid)
+        r.hset(luid, 'name',    line.name)
+        r.hset(luid, 'md',      params['md'])
+        r.hset(luid, 'sn',      params['sn'])
+        r.hset(luid, 'line',    params['line'])  # -> uid
+
+
+def save(stops=None, lines=None):
     r = connect(database=0)
+    if lines is not None:
+        save_lines(r, lines)
+    if stops is not None:
+        save_stops(r, stops)
+
     # r.flushall()
-    print([s.uid for s in stops])
-    create_hash(r, stops)
+    # print([s.uid for s in stops])
