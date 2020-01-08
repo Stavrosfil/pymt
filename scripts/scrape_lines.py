@@ -6,6 +6,10 @@ import json
 from pathlib import Path
 import redis_save_stops
 
+"""
+Retrieve all the available lines from OASTH and save them (prefferably to Redis).
+"""
+
 DATA_FOLDER = Path("data")
 
 # --------------------------------- GET DATA --------------------------------- #
@@ -54,10 +58,13 @@ def save_to_json():
         to_json = []
 
         for line in parsed_lines:
-            p_line = {'line_id': line.line_id,
-                      'line_number': line.line_number,
-                      'line_description': line.line_description,
-                      'generated_url': line.generated_url}
+            p_line = {'uid': line.uid,
+                      'number': line.number,
+                      'name': line.line_description,
+                      'md': line.params['md'],
+                      'sn': line.params['sn'],
+                      'line': line.params['line'],
+                      }
             to_json.append(p_line)
 
         json.dump(to_json, of, indent=2, ensure_ascii=False)
