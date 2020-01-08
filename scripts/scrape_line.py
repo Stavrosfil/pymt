@@ -100,8 +100,8 @@ def save_to_json():
         of.close()
 
 
-# def save_to_redis():
-#     redis_save_stops.save(parsed_stops)
+def save_to_redis():
+    redis_save_stops.save(parsed_stops)
 
 
-# save_to_redis()
+save_to_redis()
