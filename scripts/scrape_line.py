@@ -12,7 +12,14 @@ from urllib.parse import urlparse, parse_qs
 DATA_FOLDER = Path("data")
 
 """
-Example json line object
+
+This script scrapes the stops and url parameters of a requested line id.
+Input:  line_id (int)
+Output: JSON object with all the info for the line stops
+
+TODO: Convert the json object to sqlite output
+
+Example json line object (to be depricated )
 ---------------------------------------------------------------------------
 {
     "line_id": 146,

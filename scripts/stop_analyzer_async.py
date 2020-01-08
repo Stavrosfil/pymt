@@ -5,40 +5,104 @@ import json
 import requests
 import async_requests
 from modules import Stop as Stop
+import time
 
+from datetime import datetime
 
-DATA_FOLDER = Path("data")
+from influxdb import InfluxDBClient
+
+'''
+A script to analyze a selected stop and output the data to an InfluxDB server.
+
+TODO: Input is a line or a stop?
+'''
 
 stop_ids = []
-
-with open(DATA_FOLDER / "oasth_stops.json", "r") as f:
-
-    for d in json.load(f):
-        stop_ids.append(d["stop_id"])
-        # print(f'Stop ID: { str(stop_id) }')
-
-    f.close()
+stop_dirs = []
 
 
-with open(DATA_FOLDER / "stop_info_async.json", "a") as of:
+def main():
 
-    stop_ids = stop_ids[0:50]
+    DATA_FOLDER = Path("data")
 
+    try:
+        print("\n>>> Opening line data file...")
+        with open(DATA_FOLDER / "test.json", "r") as f:
+
+            for stop in json.load(f):
+                stop_ids.append(stop["params"]["start"])
+                stop_dirs.append(stop["params"]["dir"])
+
+                # print(f'Stop ID: { str(stop_ids[-1]) }')
+
+            print("Read {} stops".format(len(stop_ids)))
+
+            f.close()
+
+    except IOError as e:
+        print("Could not read file: ", DATA_FOLDER / "test.json")
+
+    client = InfluxDBClient('localhost', 8086)
+    client.create_database('bustests')
+    client.switch_database('bustests')
+    # print(client.get_list_database())
+
+    loop_timer = time.time()
+
+    while True:
+
+        saveToInflux(client)
+
+        time.sleep(32.0 - ((time.time() - loop_timer) % 32.0))
+
+
+def saveToInflux(client):
+
+    # stop_ids = stop_ids[0:50]
+
+    print("\n>>> Quering async requests to server...")
+    time1 = time.time()
     responses = async_requests.get_stops(stop_ids)
-    of.write('[')
+    print("Received {} responses in {} seconds".format(
+        len(responses), time.time() - time1))
 
-    for response, stop_id in zip(responses, stop_ids):
+    print("\n>>> Writing data to influxdb server...")
+    time2 = time.time()
+
+    json_body = []
+
+    for response, stop_id, direction in zip(responses, stop_ids, stop_dirs):
 
         stop = Stop.Stop(response, stop_id)
 
         if(stop is not None):
-            of.write('\n')
 
-            stop_json = {'stop_id': stop.stop_id,
-                         'buses': [b.__dict__ for b in stop.buses]}
+            for bus in stop.buses:
 
-            json.dump(stop_json, of, indent=2, ensure_ascii=False)
-            if (stop_id != stop_ids[-1]):
-                of.write(',')
+                json_body.append(
+                    {
+                        "measurement": "busArival",
+                        "tags": {
+                            "bus_id": bus.bus_id,
+                            "line_number": bus.line_number,
+                            "stop_id": stop_id,
+                            "direction": direction
+                        },
+                        "time": bus.timestamp,
+                        "fields": {
+                            "estimated_arival": bus.arival
+                        }
+                    }
+                )
 
-    of.close()
+    try:
+        client.write_points(json_body)
+        # print(json_body)
+    except Exception as e:
+        print("There was an error writing to the database: {}".format(e))
+
+    print("Files successfully written in {} seconds".format(time.time() - time2))
+
+
+if __name__ == '__main__':
+    main()
