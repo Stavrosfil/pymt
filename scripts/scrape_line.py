@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import time
 from urllib.parse import urlparse, parse_qs
+import redis_save_stops
 
 
 DATA_FOLDER = Path("data")
@@ -75,7 +76,9 @@ for direction in line_directions:
         params['dir'] = parsed_url['dir'][0]
 
         print(params, name)
-        parsed_stops.append(Stop.Stop(params=params, name=name))
+        parsed_stops.append(Stop.Stop(params=params,
+                                      name=name,
+                                      uid=params['start']))
 
 # print(parsed_stops)
 
@@ -89,14 +92,16 @@ def save_to_json():
         to_json = []
 
         for stop in parsed_stops:
-
-            p_line = {'stop_name': stop.name,
-                      'params': stop.params, }
-            to_json.append(p_line)
+            to_json.append({'stop_name':  stop.name,
+                            'params':     stop.params, })
 
         json.dump(to_json, of, indent=2, ensure_ascii=False)
 
         of.close()
 
 
-save_to_json()
+# def save_to_redis():
+#     redis_save_stops.save(parsed_stops)
+
+
+# save_to_redis()
