@@ -10,8 +10,6 @@ from urllib.parse import urlparse, parse_qs
 import redis_save_stops
 
 
-DATA_FOLDER = Path("data")
-
 """
 
 This script scrapes the stops and url parameters of a requested line id.
@@ -23,64 +21,75 @@ TODO: Convert the json object to sqlite output
 Example json line object (to be depricated )
 ---------------------------------------------------------------------------
 {
-    "line_id": 146,
-    "line_number": "01N",
-    "line_description": "Κ.Τ.Ε.Λ. - ΑΕΡΟΔΡΟΜΙΟ ΝΥΧΤΕΡΙΝΟ",
+    "uid": 146,
+    "number": "01N",
+    "description": "Κ.Τ.Ε.Λ. - ΑΕΡΟΔΡΟΜΙΟ ΝΥΧΤΕΡΙΝΟ",
+    "md": 4,
+    "sn": 2,
+    "line": 146,
     "generated_url": "http://m.oasth.gr/#index.php?md=4&sn=2&line=146&dhm="
 }
 ---------------------------------------------------------------------------
 """
 
-# --------------------------------- GET DATA --------------------------------- #
 
-BASE_URL = "http://m.oasth.gr/index.php"
-HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-PARAMS = {'md': 4, 'sn': 2, 'line': 146, 'dhm': '&', 'f': 1}
-# generated_url = 'http://m.oasth.gr/#index.php?md=4&sn=2&line=146&dhm=&f=1'
+def scrape_line(line):
 
-session = requests.Session()
-response = session.get(BASE_URL, params=PARAMS, headers=HEADERS).text
-session.close()
+    # -------------------------------- LOAD STOPS -------------------------------- #
 
-# ------------------------------ BEAUTIFUL SOUP ------------------------------ #
+    DATA_FOLDER = Path("data")
+    BASE_URL = "http://m.oasth.gr/index.php"
+    HEADERS = {"X-Requested-With": "XMLHttpRequest"}
+    PARAMS = {'md': line.params['md'],
+              'sn': line.params['sn'],
+              'line': line.uid,
+              'dhm': '&',
+              'f': 1}
+    # generated_url = 'http://m.oasth.gr/#index.php?md=4&sn=2&line=146&dhm=&f=1'
 
-soup = BeautifulSoup(response, 'html5lib')
-print(soup.prettify())
+    session = requests.Session()
+    response = session.get(BASE_URL, params=PARAMS, headers=HEADERS).text
+    session.close()
 
-# We get two menu divisions: start  -> dest
-#                            dest   -> start
-# This time the importand info is loaded with js, and is found under the 'menu' tag
-# The only difference is that we discard the first menu division, because it belongs to the unloaded page.
-line_directions = soup.find_all('div', attrs={'class': 'menu'})
+    # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
 
-parsed_stops = []
+    soup = BeautifulSoup(response, 'html5lib')
+    print(soup.prettify())
 
-# Get all the individual stops for each direction.
-for direction in line_directions:
-    stops = direction.find_all('h3')
-    for stop in stops:
-        # !: We must remove '#' from the url or the urlparse lib will not work properly.
-        href = stop.find('a', href=True).get('href').replace('#', '')
-        index = stop.find('span', attrs={'class': 'sp2'}).text
-        name = stop.find('span', attrs={'class': 'spt'}).text
+    # We get two menu divisions: start  -> dest
+    #                            dest   -> start
+    # This time the importand info is loaded with js, and is found under the 'menu' tag
+    # The only difference is that we discard the first menu division, because it belongs to the unloaded page.
+    line_directions = soup.find_all('div', attrs={'class': 'menu'})
 
-        parsed_url = parse_qs(urlparse(str(href)).query)
-        params = {}
+    parsed_stops = []
 
-        params['md'] = parsed_url['md'][0]
-        params['sn'] = parsed_url['sn'][0]
-        params['start'] = parsed_url['start'][0]
-        params['sorder'] = parsed_url['sorder'][0]
-        params['rc'] = parsed_url['rc'][0]
-        params['line'] = parsed_url['line'][0]
-        params['dir'] = parsed_url['dir'][0]
+    # Get all the individual stops for each direction.
+    for direction in line_directions:
+        stops = direction.find_all('h3')
+        for stop in stops:
+            # !: We must remove '#' from the url or the urlparse lib will not work properly.
+            href = stop.find('a', href=True).get('href').replace('#', '')
+            index = stop.find('span', attrs={'class': 'sp2'}).text
+            name = stop.find('span', attrs={'class': 'spt'}).text
 
-        print(params, name)
-        parsed_stops.append(Stop.Stop(params=params,
-                                      name=name,
-                                      uid=params['start']))
+            parsed_url = parse_qs(urlparse(str(href)).query)
+            params = {}
 
-# print(parsed_stops)
+            params['md'] = parsed_url['md'][0]
+            params['sn'] = parsed_url['sn'][0]
+            params['start'] = parsed_url['start'][0]
+            params['sorder'] = parsed_url['sorder'][0]
+            params['rc'] = parsed_url['rc'][0]
+            params['line'] = parsed_url['line'][0]
+            params['dir'] = parsed_url['dir'][0]
+
+            print(params, name)
+            parsed_stops.append(Stop.Stop(params=params,
+                                          name=name,
+                                          uid=params['start']))
+
+    # print(parsed_stops)
 
 # ---------------------------- SAVE DATA TO REDIS ---------------------------- #
 
