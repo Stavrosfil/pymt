@@ -82,8 +82,14 @@ for direction in line_directions:
 
 # print(parsed_stops)
 
-# -------------------------- SAVE DATA TO JSON FILE -------------------------- #
+# ---------------------------- SAVE DATA TO REDIS ---------------------------- #
 
+
+def save_to_redis():
+    redis_save_stops.save(parsed_stops)
+
+
+# -------------------------- SAVE DATA TO JSON FILE -------------------------- #
 
 def save_to_json():
 
@@ -98,10 +104,6 @@ def save_to_json():
         json.dump(to_json, of, indent=2, ensure_ascii=False)
 
         of.close()
-
-
-def save_to_redis():
-    redis_save_stops.save(parsed_stops)
 
 
 save_to_redis()

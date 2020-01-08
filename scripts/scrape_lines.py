@@ -1,9 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import Line as Line
+from modules import Line as Line
 import json
 from pathlib import Path
+import redis_save_stops
 
 DATA_FOLDER = Path("data")
 
@@ -34,7 +35,13 @@ lines = soup.find_all('h3')
 # Extract all the information from each individual line, using Line objects
 parsed_lines = []
 for line in lines:
-    parsed_lines.append(Line.Line(line=line, base_url=BASE_URL))
+    parsed_lines.append(Line.Line(html_payload=line))
+
+
+# ---------------------------- SAVE DATA TO REDIS ---------------------------- #
+
+def save_to_redis():
+    redis_save_stops.save(lines=parsed_lines)
 
 
 # -------------------------- SAVE DATA TO JSON FILE -------------------------- #
@@ -58,4 +65,4 @@ def save_to_json():
         of.close()
 
 
-save_to_json()
+save_to_redis()
