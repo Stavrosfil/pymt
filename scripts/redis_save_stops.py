@@ -45,11 +45,11 @@ def connect(database):
     """
 
     r = redis.Redis(host='localhost', port=6379, db=database)
-    print(r.info())
+    # print(r.info())
     return r
 
 
-def save_stops(r, stops, line):
+def save_stops(r, stops):
     """Creates all the required hashes for stop info storage
 
     Arguments:
@@ -59,7 +59,7 @@ def save_stops(r, stops, line):
     for stop in stops:
 
         # e.g 's819': Stop 819
-        suid = 's{}'.format(stop.uid)
+        suid = 'stop{}'.format(stop.uid)
         params = stop.params
 
         # Add parameters to the s prefixed hash.
@@ -73,10 +73,15 @@ def save_stops(r, stops, line):
         r.hset(suid, 'dir',      params['dir'])
 
         # e.g. 'l819': Lines for stop 819
-        luid = 'l{}'.format(stop.uid)
+        luid = 'stop{}:lines'.format(stop.uid)
 
         # Add available lines to the 'l' prefixed hash.
-        r.hset(luid, str(line.uid), params['sorder'])
+        r.hset(luid, str(params['line']), params['sorder'])
+
+        lsuid = 'line{}:direction{}:stops'.format(
+            params['line'], params['dir'])
+
+        r.hset(lsuid, stop.uid, params['sorder'])
 
 
 def save_lines(r, lines):
@@ -84,15 +89,19 @@ def save_lines(r, lines):
     for line in lines:
 
         # e.g. 'l02k': Line O2K
-        luid = 'l{}'.format(line.number)
+        luid = 'line{}'.format(line.uid)
         params = line.params
 
         # Add parameters to the hash
         r.hset(luid, 'uid',     line.uid)
         r.hset(luid, 'name',    line.name)
+        r.hset(luid, 'number',  line.number)
         r.hset(luid, 'md',      params['md'])
         r.hset(luid, 'sn',      params['sn'])
         r.hset(luid, 'line',    params['line'])  # -> uid
+
+        # 'lines' -> '02K': 250
+        r.hset('lines', line.number, line.uid)
 
 
 def save(stops=None, lines=None):
