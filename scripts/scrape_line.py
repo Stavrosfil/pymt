@@ -40,9 +40,11 @@ def scrape_line(line):
     DATA_FOLDER = Path("data")
     BASE_URL = "http://m.oasth.gr/index.php"
     HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-    PARAMS = {'md': line.params['md'],
-              'sn': line.params['sn'],
-              'line': line.uid,
+    # TODO: Use a line object instead of a line UID.
+    # TODO: Depricate md, sn in line objects, always the same.
+    PARAMS = {'md': 4,
+              'sn': 2,
+              'line': line,
               'dhm': '&',
               'f': 1}
     # generated_url = 'http://m.oasth.gr/#index.php?md=4&sn=2&line=146&dhm=&f=1'
