@@ -89,13 +89,15 @@ def scrape_line(line):
                                           name=name,
                                           uid=params['start']))
 
+    save_to_redis(parsed_stops)
+
     # print(parsed_stops)
 
 # ---------------------------- SAVE DATA TO REDIS ---------------------------- #
 
 
-def save_to_redis():
-    redis_save_stops.save(parsed_stops)
+def save_to_redis(stops):
+    redis_save_stops.save(stops=stops)
 
 
 # -------------------------- SAVE DATA TO JSON FILE -------------------------- #
@@ -113,6 +115,3 @@ def save_to_json():
         json.dump(to_json, of, indent=2, ensure_ascii=False)
 
         of.close()
-
-
-save_to_redis()
