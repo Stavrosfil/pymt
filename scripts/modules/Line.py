@@ -5,7 +5,8 @@ import oasth_parsing as oasth_parser
 
 class Line:
 
-    def __init__(self, uid=None, name=None, number=None, html_payload=None, base_url=None, stops=None, params={}):
+    # TODO: Check params initialization to a None type, maybe change back to dict. Also check initialization through the parser with self.
+    def __init__(self, uid=None, name=None, number=None, html_payload=None, base_url=None, stops=None, params=None):
         self.uid = uid
         self.name = name
         self.number = number

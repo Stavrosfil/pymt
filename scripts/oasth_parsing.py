@@ -154,6 +154,7 @@ def parse_line(self, payload):
 
     self.href = payload.find('a', href=True).get('href')
     self.uid = int(re.search(r'line=\d+', self.href).group()[5:])
+    self.params = {}
     self.params['sn'] = re.search(r'sn=\d+', self.href).group()[3:]
     self.params['md'] = re.search(r'md=\d+', self.href).group()[3:]
     self.params['line'] = re.search(r'line=\d+', self.href).group()[5:]
