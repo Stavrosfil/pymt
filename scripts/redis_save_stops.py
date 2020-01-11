@@ -78,7 +78,7 @@ def save_stops(r, stops):
         # Add available lines to the 'l' prefixed hash.
         r.hset(luid, str(params['line']), params['sorder'])
 
-        lsuid = 'line{}:direction{}:stops'.format(
+        lsuid = 'line{}:stops:direction{}'.format(
             params['line'], params['dir'])
 
         r.hset(lsuid, stop.uid, params['sorder'])
