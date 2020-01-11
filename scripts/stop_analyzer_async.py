@@ -27,7 +27,7 @@ def main():
 
     try:
         print("\n>>> Opening line data file...")
-        with open(DATA_FOLDER / "test.json", "r") as f:
+        with open(DATA_FOLDER / "test.json", "r", encoding='utf-8') as f:
 
             for stop in json.load(f):
                 stop_ids.append(stop["params"]["start"])
@@ -42,7 +42,7 @@ def main():
     except IOError as e:
         print("Could not read file: ", DATA_FOLDER / "test.json")
 
-    client = InfluxDBClient('localhost', 8086)
+    client = InfluxDBClient('localhost', 8087)
     client.create_database('bustests')
     client.switch_database('bustests')
     # print(client.get_list_database())
