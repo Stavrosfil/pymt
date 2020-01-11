@@ -1,3 +1,5 @@
 html5lib
 beautufulsoup4
 influxdb
+aiohttp
+requests
