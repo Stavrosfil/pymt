@@ -63,16 +63,9 @@ def save_stops(r, stops):
         params = stop.params
 
         # Add parameters to the s prefixed hash.
-        stop_attributes = {
-            'name':     stop.name,
-            'md':       params['md'],
-            'sn':       params['sn'],
-            'start':    params['start'],
-            'sorder':   params['sorder'],
-            'rc':       params['rc'],
-            'line':     params['line'],
-            'dir':      params['dir'],
-        }
+        stop_attributes = {'name': stop.name}
+        stop_attributes.update(params)
+
         r.hmset(suid, stop_attributes)
 
         # e.g. 'l819': Lines for stop 819
@@ -100,10 +93,8 @@ def save_lines(r, lines):
             'uid':     line.uid,
             'name':    line.name,
             'number':  line.number,
-            'md':      params['md'],
-            'sn':      params['sn'],
-            'line':    params['line'],  # -> uid
         }
+        line_attributes.update(params)
         r.hmset(luid, line_attributes)
 
         # 'lines' -> '02K': 250
