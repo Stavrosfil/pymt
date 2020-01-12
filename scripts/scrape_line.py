@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from modules import Stop as Stop
 from urllib.parse import urlparse, parse_qs
-import redis_save_stops
+import redis_operations
 
 
 """
@@ -93,4 +93,4 @@ def scrape_line(line):
 
 
 def save_to_redis(stops):
-    redis_save_stops.save(stops=stops)
+    redis_operations.save(stops=stops)
