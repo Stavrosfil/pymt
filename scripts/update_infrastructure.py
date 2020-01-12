@@ -1,6 +1,6 @@
 import scrape_lines
 import scrape_line
-import redis_save_stops
+# import redis_save_stops
 import redis
 
 
@@ -12,22 +12,23 @@ def main():
 
 def get_line_stops(selected_lines, db=0):
 
-    selected_stops = []
+    selected_stops = set()
 
     # Initialize Redis client object
     r = redis.Redis(host='localhost', port=6379, db=db)
 
     # Load lines from Redis cache into dictionary
-    selected_lines_uids = [int(l) for l in r.hmget('lines', selected_lines)]
+    selected_lines_uids = set([int(l) for l in r.hmget('lines', selected_lines)])
     # print(selected_lines_uids)
 
     for line_uid in selected_lines_uids:
         for direction in (1, 2):
             lsuid = 'line{}:stops:direction{}'.format(line_uid, direction)
             stops = [int(s) for s in r.hgetall(lsuid).keys()]
-            selected_stops.extend(stops)
+            selected_stops.update(stops)
 
     return selected_stops
+
 
 # ---------------------------------------------------------------------------- #
 #                             UPDATE INFRASTRUCTURE                            #
