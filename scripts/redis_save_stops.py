@@ -63,14 +63,17 @@ def save_stops(r, stops):
         params = stop.params
 
         # Add parameters to the s prefixed hash.
-        r.hset(suid, 'name',     stop.name)
-        r.hset(suid, 'md',       params['md'])
-        r.hset(suid, 'sn',       params['sn'])
-        r.hset(suid, 'start',    params['start'])
-        r.hset(suid, 'sorder',   params['sorder'])
-        r.hset(suid, 'rc',       params['rc'])
-        r.hset(suid, 'line',     params['line'])
-        r.hset(suid, 'dir',      params['dir'])
+        stop_attributes = {
+            'name':     stop.name,
+            'md':       params['md'],
+            'sn':       params['sn'],
+            'start':    params['start'],
+            'sorder':   params['sorder'],
+            'rc':       params['rc'],
+            'line':     params['line'],
+            'dir':      params['dir'],
+        }
+        r.hmset(suid, stop_attributes)
 
         # e.g. 'l819': Lines for stop 819
         luid = 'stop{}:lines'.format(stop.uid)
@@ -93,12 +96,15 @@ def save_lines(r, lines):
         params = line.params
 
         # Add parameters to the hash
-        r.hset(luid, 'uid',     line.uid)
-        r.hset(luid, 'name',    line.name)
-        r.hset(luid, 'number',  line.number)
-        r.hset(luid, 'md',      params['md'])
-        r.hset(luid, 'sn',      params['sn'])
-        r.hset(luid, 'line',    params['line'])  # -> uid
+        line_attributes = {
+            'uid':     line.uid,
+            'name':    line.name,
+            'number':  line.number,
+            'md':      params['md'],
+            'sn':      params['sn'],
+            'line':    params['line'],  # -> uid
+        }
+        r.hmset(luid, line_attributes)
 
         # 'lines' -> '02K': 250
         r.hset('lines', line.number, line.uid)
