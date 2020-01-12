@@ -21,7 +21,7 @@ def main():
 
     try:
         print("\n>>> Opening line data file...")
-        with open(DATA_FOLDER / "test.json", "r") as f:
+        with open(DATA_FOLDER / "test.json", "r", encoding='utf-8') as f:
 
             for stop in json.load(f):
                 stop_ids.append(stop["params"]["start"])
@@ -38,8 +38,8 @@ def main():
         print(e)
 
     client = InfluxDBClient('localhost', 8089)
-    client.create_database('bustests')
-    client.switch_database('bustests')
+    client.create_database('bus_arrivals')
+    client.switch_database('bus_arrivals')
     # print(client.get_list_database())
 
     loop_timer = time.time()
