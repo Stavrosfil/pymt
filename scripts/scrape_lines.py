@@ -1,61 +1,46 @@
 import requests
 from bs4 import BeautifulSoup
-import re
-import Line as Line
-import json
-from pathlib import Path
+from modules import Line as Line
+import redis_operations
 
-DATA_FOLDER = Path("data")
-
-# --------------------------------- GET DATA --------------------------------- #
-
-BASE_URL = "http://m.oasth.gr/#index.php"
-PARAMS = {"md": 4}
-HEADERS = {"X-Requested-With": "XMLHttpRequest"}
-
-session = requests.Session()
-response = session.get(BASE_URL, params=PARAMS, headers=HEADERS)
-session.close()
+"""
+Retrieve all the available lines from OASTH and save them (prefferably to Redis).
+"""
 
 
-# ------------------------------ BEAUTIFUL SOUP ------------------------------ #
+def scrape_lines():
 
-soup = BeautifulSoup(response.text, 'html5lib')
+    # --------------------------------- GET DATA --------------------------------- #
 
-# Menu div contains all the lines listed in the page.
-soup = soup.find('div', attrs={'class': 'menu'})
+    BASE_URL = "http://m.oasth.gr/#index.php"
+    PARAMS = {"md": 4}
+    HEADERS = {"X-Requested-With": "XMLHttpRequest"}
 
-# Get all the individual lines with their attributes
-lines = soup.find_all('h3')
+    session = requests.Session()
+    response = session.get(BASE_URL, params=PARAMS, headers=HEADERS)
+    session.close()
 
+    # ------------------------------ BEAUTIFUL SOUP ------------------------------ #
 
-# ---------------------------------- PARSING --------------------------------- #
+    soup = BeautifulSoup(response.text, 'html5lib')
 
-# Extract all the information from each individual line, using Line objects
-parsed_lines = []
-for line in lines:
-    parsed_lines.append(Line.Line(line=line, base_url=BASE_URL))
+    # Menu div contains all the lines listed in the page.
+    soup = soup.find('div', attrs={'class': 'menu'})
 
+    # Get all the individual lines with their attributes
+    lines = soup.find_all('h3')
 
-# -------------------------- SAVE DATA TO JSON FILE -------------------------- #
+    # ---------------------------------- PARSING --------------------------------- #
 
+    # Extract all the information from each individual line, using Line objects
+    parsed_lines = []
+    for line in lines:
+        parsed_lines.append(Line.Line(html_payload=line))
 
-def save_to_json():
-
-    with open(DATA_FOLDER / "lines.json", "a") as of:
-
-        to_json = []
-
-        for line in parsed_lines:
-            p_line = {'line_id': line.line_id,
-                      'line_number': line.line_number,
-                      'line_description': line.line_description,
-                      'generated_url': line.generated_url}
-            to_json.append(p_line)
-
-        json.dump(to_json, of, indent=2, ensure_ascii=False)
-
-        of.close()
+    save_to_redis(parsed_lines)
 
 
-save_to_json()
+# ---------------------------- SAVE DATA TO REDIS ---------------------------- #
+
+def save_to_redis(lines):
+    redis_operations.save(lines=lines)

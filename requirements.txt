@@ -1,5 +1,6 @@
 html5lib
 beautufulsoup4
 influxdb
+redis
 aiohttp
 requests

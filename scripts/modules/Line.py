@@ -5,16 +5,16 @@ import oasth_parsing as oasth_parser
 
 class Line:
 
-    def __init__(self, line=None, stops=None, base_url=None, line_id=0, href="", sn=0, generated_url="", line_number=""):
-        self.line_id = line_id
-        self.href = href
-        self.sn = sn
-        self.generated_url = generated_url
-        self.line_number = line_number
+    # TODO: Check params initialization to a None type, maybe change back to dict. Also check initialization through the parser with self.
+    def __init__(self, uid=None, name=None, number=None, html_payload=None, base_url=None, stops=None, params=None):
+        self.uid = uid
+        self.name = name
+        self.number = number
         self.stops = stops
+        self.params = params
 
-        if line is not None:
-            oasth_parser.parse_line(self, line=line)
+        if html_payload is not None:
+            oasth_parser.parse_line(self, payload=html_payload)
 
         if base_url is not None:
             self.generate_url(base_url)
@@ -26,8 +26,7 @@ class Line:
         Arguments:
             base_url {String} -- The OASTH base string used to make all the requests.
         """
-        if self.line_id == 0:
-            print(
-                "The object is not initialized correctly, try running parse_line() first!")
-        args = '?md=4&sn=%s&line=%i&dhm=' % (self.sn, self.line_id)
+
+        args = '?md=4&sn={}&line={}&dhm='.format(self.sn, self.line_id)
         self.generated_url = base_url + args
+        return self.generated_url

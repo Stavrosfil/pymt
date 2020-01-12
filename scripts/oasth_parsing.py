@@ -132,7 +132,7 @@ def parse_line_stops(payload):
     return parsed_stops
 
 
-def parse_line(self, line):
+def parse_line(self, payload):
     """
     Parses the given soup object and extracts line details.
 
@@ -152,14 +152,11 @@ def parse_line(self, line):
         </h3>
     """
 
-    self.href = line.find('a', href=True).get('href')
-    self.line_id = int(re.search(r'line=\d+', self.href).group()[5:])
-    self.sn = re.search(r'sn=\d+', self.href).group()[3:]
-    self.line_number = line.find('span', attrs={'class': 'sp1'}).text
-    self.line_description = line.find('span', attrs={'class': 'sp2'}).text
-
-    # return Line(href=href,
-    # line_id=line_id,
-    # sn=sn,
-    # line_number=line_number,
-    # line_description=line_description)
+    self.href = payload.find('a', href=True).get('href')
+    self.uid = int(re.search(r'line=\d+', self.href).group()[5:])
+    self.params = {}
+    self.params['sn'] = re.search(r'sn=\d+', self.href).group()[3:]
+    self.params['md'] = re.search(r'md=\d+', self.href).group()[3:]
+    self.params['line'] = re.search(r'line=\d+', self.href).group()[5:]
+    self.number = payload.find('span', attrs={'class': 'sp1'}).text
+    self.name = payload.find('span', attrs={'class': 'sp2'}).text
