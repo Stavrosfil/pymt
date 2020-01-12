@@ -1,14 +1,8 @@
 from pathlib import Path
-import sys
-import re
 import json
-import requests
 import async_requests
 from modules import Stop as Stop
 import time
-
-from datetime import datetime
-
 from influxdb import InfluxDBClient
 
 '''
@@ -41,8 +35,9 @@ def main():
 
     except IOError as e:
         print("Could not read file: ", DATA_FOLDER / "test.json")
+        print(e)
 
-    client = InfluxDBClient('localhost', 8086)
+    client = InfluxDBClient('localhost', 8089)
     client.create_database('bustests')
     client.switch_database('bustests')
     # print(client.get_list_database())

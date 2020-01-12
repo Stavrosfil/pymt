@@ -1,11 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import re
-from modules import Line as Line
 from modules import Stop as Stop
-import json
-from pathlib import Path
-import time
 from urllib.parse import urlparse, parse_qs
 import redis_save_stops
 
@@ -37,7 +32,6 @@ def scrape_line(line):
 
     # -------------------------------- LOAD STOPS -------------------------------- #
 
-    DATA_FOLDER = Path("data")
     BASE_URL = "http://m.oasth.gr/index.php"
     HEADERS = {"X-Requested-With": "XMLHttpRequest"}
     # TODO: Use a line object instead of a line UID.
@@ -72,7 +66,7 @@ def scrape_line(line):
         for stop in stops:
             # !: We must remove '#' from the url or the urlparse lib will not work properly.
             href = stop.find('a', href=True).get('href').replace('#', '')
-            index = stop.find('span', attrs={'class': 'sp2'}).text
+            # index = stop.find('span', attrs={'class': 'sp2'}).text
             name = stop.find('span', attrs={'class': 'spt'}).text
 
             parsed_url = parse_qs(urlparse(str(href)).query)
@@ -100,20 +94,3 @@ def scrape_line(line):
 
 def save_to_redis(stops):
     redis_save_stops.save(stops=stops)
-
-
-# -------------------------- SAVE DATA TO JSON FILE -------------------------- #
-
-def save_to_json():
-
-    with open(DATA_FOLDER / "test.json", "a") as of:
-
-        to_json = []
-
-        for stop in parsed_stops:
-            to_json.append({'stop_name':  stop.name,
-                            'params':     stop.params, })
-
-        json.dump(to_json, of, indent=2, ensure_ascii=False)
-
-        of.close()

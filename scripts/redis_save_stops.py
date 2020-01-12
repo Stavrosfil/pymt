@@ -107,6 +107,3 @@ def save(stops=None, lines=None):
         save_lines(r, lines)
     if stops is not None:
         save_stops(r, stops)
-
-    # r.flushall()
-    # print([s.uid for s in stops])

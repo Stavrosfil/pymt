@@ -1,9 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import re
 from modules import Line as Line
-import json
-from pathlib import Path
 import redis_save_stops
 
 """
@@ -47,27 +44,3 @@ def scrape_lines():
 
 def save_to_redis(lines):
     redis_save_stops.save(lines=lines)
-
-
-# -------------------------- SAVE DATA TO JSON FILE -------------------------- #
-
-
-def save_to_json():
-
-    with open(DATA_FOLDER / "lines.json", "a") as of:
-
-        to_json = []
-
-        for line in parsed_lines:
-            p_line = {'uid': line.uid,
-                      'number': line.number,
-                      'name': line.line_description,
-                      'md': line.params['md'],
-                      'sn': line.params['sn'],
-                      'line': line.params['line'],
-                      }
-            to_json.append(p_line)
-
-        json.dump(to_json, of, indent=2, ensure_ascii=False)
-
-        of.close()
