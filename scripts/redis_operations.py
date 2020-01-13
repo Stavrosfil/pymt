@@ -142,7 +142,7 @@ def get_line_stops(selected_lines, db=0):
             stops = [int(s) for s in r.hgetall(lsuid).keys()]
             selected_stops.update(stops)
 
-    return selected_stops
+    return list(selected_stops)
 
 
 # ---------------------------------------------------------------------------- #

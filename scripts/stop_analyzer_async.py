@@ -1,9 +1,9 @@
-from pathlib import Path
-import json
 import async_requests
 from modules import Stop as Stop
 import time
 from influxdb import InfluxDBClient
+import redis_operations as ro
+import redis
 
 '''
 A script to analyze a selected stop and output the data to an InfluxDB server.
@@ -11,31 +11,20 @@ A script to analyze a selected stop and output the data to an InfluxDB server.
 TODO: Input is a line or a stop?
 '''
 
-stop_ids = []
 stop_dirs = []
 
 
 def main():
 
-    DATA_FOLDER = Path("data")
+    r = redis.Redis(host='localhost', port=6379, db=0)
 
-    try:
-        print("\n>>> Opening line data file...")
-        with open(DATA_FOLDER / "test.json", "r", encoding='utf-8') as f:
+    stop_ids = []
+    SELECTED_LINES = ['01N', '01X', '02K', '03K']
+    stop_ids = ro.get_line_stops(SELECTED_LINES)
+    print(stop_ids)
 
-            for stop in json.load(f):
-                stop_ids.append(stop["params"]["start"])
-                stop_dirs.append(stop["params"]["dir"])
-
-                # print(f'Stop ID: { str(stop_ids[-1]) }')
-
-            print("Read {} stops".format(len(stop_ids)))
-
-            f.close()
-
-    except IOError as e:
-        print("Could not read file: ", DATA_FOLDER / "test.json")
-        print(e)
+    for stop in stop_ids:
+        stop_dirs.append(int(r.hget('stop{}'.format(stop), 'dir')))
 
     client = InfluxDBClient('localhost', 8089)
     client.create_database('bus_arrivals')
@@ -46,20 +35,19 @@ def main():
 
     while True:
 
-        saveToInflux(client)
+        saveToInflux(client, stop_ids)
 
         time.sleep(32.0 - ((time.time() - loop_timer) % 32.0))
 
 
-def saveToInflux(client):
+def saveToInflux(client, stop_ids):
 
     # stop_ids = stop_ids[0:50]
 
     print("\n>>> Quering async requests to server...")
     time1 = time.time()
     responses = async_requests.get_stops(stop_ids)
-    print("Received {} responses in {} seconds".format(
-        len(responses), time.time() - time1))
+    print("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
 
     print("\n>>> Writing data to influxdb server...")
     time2 = time.time()
