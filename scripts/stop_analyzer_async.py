@@ -11,7 +11,7 @@ A script to analyze a selected stop and output the data to an InfluxDB server.
 TODO: Input is a line or a stop?
 '''
 
-stop_dirs = []
+stop_dirs = {}
 
 
 def main():
@@ -20,11 +20,12 @@ def main():
 
     stop_ids = []
     SELECTED_LINES = ['01N', '01X', '02K', '03K']
+    # SELECTED_LINES = [l.decode('utf-8') for l in r.hkeys('lines')]
     stop_ids = ro.get_line_stops(SELECTED_LINES)
     print(stop_ids)
 
     for stop in stop_ids:
-        stop_dirs.append(int(r.hget('stop{}'.format(stop), 'dir')))
+        stop_dirs[stop] = int(r.hget('stop{}'.format(stop), 'dir'))
 
     client = InfluxDBClient('localhost', 8089)
     client.create_database('bus_arrivals')
@@ -54,7 +55,7 @@ def saveToInflux(client, stop_ids):
 
     json_body = []
 
-    for response, stop_id, direction in zip(responses, stop_ids, stop_dirs):
+    for response, stop_id in zip(responses, stop_ids):
 
         stop = Stop.Stop(response, stop_id)
 
@@ -69,7 +70,7 @@ def saveToInflux(client, stop_ids):
                             "bus_id": bus.bus_id,
                             "line_number": bus.line_number,
                             "stop_id": stop_id,
-                            "direction": direction
+                            "direction": stop_dirs[stop_id]
                         },
                         "time": bus.timestamp,
                         "fields": {
