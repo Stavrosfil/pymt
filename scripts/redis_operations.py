@@ -1,6 +1,7 @@
 import scrape_lines
 import scrape_line
 import redis
+from modules import Stop
 
 
 """
@@ -136,11 +137,15 @@ def get_line_stops(selected_lines, db=0):
     selected_lines_uids = set([int(l) for l in r.hmget('lines', selected_lines)])
     # print(selected_lines_uids)
 
+    unique_stop_uids = set()
     for line_uid in selected_lines_uids:
         for direction in (1, 2):
             lsuid = 'line{}:stops:direction{}'.format(line_uid, direction)
-            stops = [int(s) for s in r.hgetall(lsuid).keys()]
-            selected_stops.extend(stops)
+            unique_stop_uids.update([int(s) for s in r.hgetall(lsuid)])
+
+    for uid in unique_stop_uids:
+        redis_stop = r.hgetall('stop{}'.format(uid))
+        selected_stops.append(Stop.Stop(uid=uid, params={'dir': int(redis_stop[b'dir'])}))
 
     return selected_stops
 
