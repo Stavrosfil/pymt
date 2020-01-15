@@ -127,7 +127,7 @@ def save(stops=None, lines=None):
 
 def get_line_stops(selected_lines, db=0):
 
-    selected_stops = set()
+    selected_stops = []
 
     # Initialize Redis client object
     r = redis.Redis(host='localhost', port=6379, db=db)
@@ -140,9 +140,9 @@ def get_line_stops(selected_lines, db=0):
         for direction in (1, 2):
             lsuid = 'line{}:stops:direction{}'.format(line_uid, direction)
             stops = [int(s) for s in r.hgetall(lsuid).keys()]
-            selected_stops.update(stops)
+            selected_stops.extend(stops)
 
-    return list(selected_stops)
+    return selected_stops
 
 
 # ---------------------------------------------------------------------------- #
