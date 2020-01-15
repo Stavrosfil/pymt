@@ -25,8 +25,7 @@ class Stop:
         # params['dir']
 
         if payload is not None:
-
-            stop = oasth_parser.parse_stop(self, payload, uid)
+            oasth_parser.parse_stop(self, payload, uid)
 
         else:
             self.params = params
@@ -38,3 +37,6 @@ class Stop:
 
     def add_bus(self, bus):
         self.buses.append(bus)
+
+    def update(self, payload):
+        self.buses = oasth_parser.parse_stop_buses(payload)
