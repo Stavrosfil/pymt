@@ -3,7 +3,6 @@ from modules import Stop as Stop
 import time
 from influxdb import InfluxDBClient
 import redis_operations as ro
-import redis
 
 '''
 A script to analyze a selected stop and output the data to an InfluxDB server.
@@ -16,16 +15,10 @@ stop_dirs = {}
 
 def main():
 
-    r = redis.Redis(host='localhost', port=6379, db=0)
-
-    stop_ids = []
     SELECTED_LINES = ['01N', '01X', '02K', '03K']
     # SELECTED_LINES = [l.decode('utf-8') for l in r.hkeys('lines')]
-    stop_ids = ro.get_line_stops(SELECTED_LINES)
-    print(stop_ids)
-
-    for stop in stop_ids:
-        stop_dirs[stop] = int(r.hget('stop{}'.format(stop), 'dir'))
+    stops = ro.get_line_stops(SELECTED_LINES)
+    print(stops)
 
     client = InfluxDBClient('localhost', 8089)
     client.create_database('bus_arrivals')
@@ -36,28 +29,30 @@ def main():
 
     while True:
 
-        saveToInflux(client, stop_ids)
+        # stop_ids = stop_ids[0:50]
+
+        print("\n>>> Quering async requests to server...")
+        time1 = time.time()
+
+        responses = async_requests.get_stops([s.uid for s in stops])
+        print("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
+
+        for response, stop in zip(responses, stops):
+            stop.update(response)
+
+        saveToInflux(client, stops)
 
         time.sleep(32.0 - ((time.time() - loop_timer) % 32.0))
 
 
-def saveToInflux(client, stop_ids):
-
-    # stop_ids = stop_ids[0:50]
-
-    print("\n>>> Quering async requests to server...")
-    time1 = time.time()
-    responses = async_requests.get_stops(stop_ids)
-    print("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
+def saveToInflux(client, stops):
 
     print("\n>>> Writing data to influxdb server...")
     time2 = time.time()
 
     json_body = []
 
-    for response, stop_id in zip(responses, stop_ids):
-
-        stop = Stop.Stop(response, stop_id)
+    for stop in stops:
 
         if(stop is not None):
 
@@ -69,8 +64,8 @@ def saveToInflux(client, stop_ids):
                         "tags": {
                             "bus_id": bus.bus_id,
                             "line_number": bus.line_number,
-                            "stop_id": stop_id,
-                            "direction": stop_dirs[stop_id]
+                            "stop_id": stop.uid,
+                            "direction": stop.params['dir']
                         },
                         "time": bus.timestamp,
                         "fields": {
