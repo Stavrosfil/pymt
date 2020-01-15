@@ -10,7 +10,21 @@ import time
 #                                 STOP PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
-def parse_stop(self, payload, stop_id):
+def parse_stop_buses(payload):
+
+    soup = BeautifulSoup(payload, 'html5lib')
+    buses = []
+
+    # If we got buses in this stop
+    if (soup.find('div', attrs={'class': 'err'}) is None):
+        payload_arivals = soup.find('div', attrs={'class': 'menu'})
+        parsed_buses = parse_buses(payload_arivals)
+        buses = parsed_buses
+
+    return buses
+
+
+def parse_stop(self, payload, uid):
 
     soup = BeautifulSoup(payload, 'html5lib')
 
@@ -24,7 +38,7 @@ def parse_stop(self, payload, stop_id):
         parsed_buses = parse_buses(payload_arivals)
         self.buses = parsed_buses
 
-    self.stop_id = stop_id
+    self.uid = uid
     self.name = name
 
 # ---------------------------------------------------------------------------- #
