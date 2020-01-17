@@ -1,5 +1,4 @@
 import async_requests
-from modules import Stop as Stop
 import time
 from influxdb import InfluxDBClient
 import redis_operations as ro
@@ -23,22 +22,26 @@ def main():
     client = InfluxDBClient('localhost', 8089)
     client.create_database('bus_arrivals')
     client.switch_database('bus_arrivals')
-    # print(client.get_list_database())
 
     loop_timer = time.time()
 
     while True:
 
-        # stop_ids = stop_ids[0:50]
-
         print("\n>>> Quering async requests to server...")
         time1 = time.time()
 
-        responses = async_requests.get_stops([s.uid for s in stops])
-        print("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
+        try:
+            responses = async_requests.get_stops([s.uid for s in stops])
+            print("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
+        except Exception as e:
+            print("There was an exception while getting data from the server: {}".format(e))
 
-        for response, stop in zip(responses, stops):
-            stop.update(response)
+        if responses != []:
+            for response, stop in zip(responses, stops):
+                try:
+                    stop.update(response)
+                except Exception as e:
+                    print("There was an exception while parsing received response: {}".format(e))
 
         saveToInflux(client, stops)
 
@@ -77,10 +80,9 @@ def saveToInflux(client, stops):
     try:
         client.write_points(json_body)
         # print(json_body)
+        print("Files successfully written in {} seconds".format(time.time() - time2))
     except Exception as e:
         print("There was an error writing to the database: {}".format(e))
-
-    print("Files successfully written in {} seconds".format(time.time() - time2))
 
 
 if __name__ == '__main__':
