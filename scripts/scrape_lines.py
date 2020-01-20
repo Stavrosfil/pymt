@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 from modules import Line as Line
-import redis_operations
 
 """
 Retrieve all the available lines from OASTH and save them (prefferably to Redis).
@@ -37,10 +36,4 @@ def scrape_lines():
     for line in lines:
         parsed_lines.append(Line.Line(html_payload=line))
 
-    save_to_redis(parsed_lines)
-
-
-# ---------------------------- SAVE DATA TO REDIS ---------------------------- #
-
-def save_to_redis(lines):
-    redis_operations.save(lines=lines)
+    return parsed_lines

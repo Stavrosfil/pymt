@@ -40,6 +40,7 @@ stop_example = {
 # def main():
 #     SELECTED_LINES = ['01N', '02K', '03K']
 #     stops = get_line_stops(SELECTED_LINES)
+#     redis_update_infrastructure()
 #     print(stops)
 
 
@@ -113,8 +114,9 @@ def save_lines(r, lines):
         r.hset('lines', line.number, line.uid)
 
 
-def save(stops=None, lines=None):
-    r = connect(database=0)
+def save(r=None, db=0, stops=None, lines=None):
+    if r is None:
+        r = connect(database=db)
     if lines is not None:
         save_lines(r, lines)
     if stops is not None:
@@ -164,15 +166,16 @@ def redis_update_infrastructure(db=0):
     r.flushdb()
 
     # Scrape all indivudual lines and save them
-    # TODO: Do not use saving by default inside scrape_lines
-    scrape_lines.scrape_lines()
+    lines = scrape_lines.scrape_lines()
+    save(r, lines=lines)
 
     # Load all line UIDs in memory
     lines = [l.decode('utf-8') for l in r.hvals('lines')]
 
     # Use line UID to scrape individual lines
     for line in lines:
-        scrape_line.scrape_line(line)
+        stops = scrape_line.scrape_line(line)
+        save(r, stops=stops)
 
     # Save database to memory
     r.save()
