@@ -62,35 +62,30 @@ def scrape_line(line):
 
     # Get all the individual stops for each direction.
     for direction in line_directions:
+
         stops = direction.find_all('h3')
         for stop in stops:
+
             # !: We must remove '#' from the url or the urlparse lib will not work properly.
             href = stop.find('a', href=True).get('href').replace('#', '')
             # index = stop.find('span', attrs={'class': 'sp2'}).text
             name = stop.find('span', attrs={'class': 'spt'}).text
 
             parsed_url = parse_qs(urlparse(str(href)).query)
-            params = {}
 
-            params['md'] = parsed_url['md'][0]
-            params['sn'] = parsed_url['sn'][0]
-            params['start'] = parsed_url['start'][0]
-            params['sorder'] = parsed_url['sorder'][0]
-            params['rc'] = parsed_url['rc'][0]
-            params['line'] = parsed_url['line'][0]
-            params['dir'] = parsed_url['dir'][0]
+            params = {
+                'md': parsed_url['md'][0],
+                'sn': parsed_url['sn'][0],
+                'start': parsed_url['start'][0],
+                'sorder': parsed_url['sorder'][0],
+                'rc': parsed_url['rc'][0],
+                'line': parsed_url['line'][0],
+                'dir': parsed_url['dir'][0],
+            }
 
             print(params, name)
             parsed_stops.append(Stop.Stop(params=params,
                                           name=name,
                                           uid=params['start']))
 
-    save_to_redis(parsed_stops)
-
-    # print(parsed_stops)
-
-# ---------------------------- SAVE DATA TO REDIS ---------------------------- #
-
-
-def save_to_redis(stops):
-    redis_operations.save(stops=stops)
+    return parsed_stops
