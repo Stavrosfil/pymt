@@ -14,8 +14,8 @@ stop_dirs = {}
 
 def main():
 
-    SELECTED_LINES = ['01N', '01X', '02K', '03K']
-    # SELECTED_LINES = [l.decode('utf-8') for l in r.hkeys('lines')]
+    # SELECTED_LINES = ['01N', '01X', '02K', '03K']
+    SELECTED_LINES = ro.get_all_lines()
     stops = ro.get_line_stops(SELECTED_LINES)
     print(stops)
 

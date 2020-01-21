@@ -152,6 +152,14 @@ def get_line_stops(selected_lines, db=0):
     return selected_stops
 
 
+def get_all_lines(db=0):
+
+    # Initialize Redis client object
+    r = redis.Redis(host='localhost', port=6379, db=db)
+
+    return [l.decode('utf-8') for l in r.hkeys('lines')]
+
+
 # ---------------------------------------------------------------------------- #
 #                             UPDATE INFRASTRUCTURE                            #
 # ---------------------------------------------------------------------------- #
