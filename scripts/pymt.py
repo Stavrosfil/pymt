@@ -14,8 +14,8 @@ stop_dirs = {}
 
 def main():
 
-    # SELECTED_LINES = ['01N', '01X', '02K', '03K']
-    SELECTED_LINES = ro.get_all_lines()
+    SELECTED_LINES = ['01N', '01X', '02K', '03K', '10', '07', '31']
+    # SELECTED_LINES = ro.get_all_lines()[:50]
     stops = ro.get_line_stops(SELECTED_LINES)
     print(stops)
 

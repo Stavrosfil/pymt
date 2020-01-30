@@ -1,5 +1,4 @@
-import scrape_lines
-import scrape_line
+import scraper
 import redis
 from modules import Stop
 
@@ -174,7 +173,7 @@ def redis_update_infrastructure(db=0):
     r.flushdb()
 
     # Scrape all indivudual lines and save them
-    lines = scrape_lines.scrape_lines()
+    lines = scraper.scrape_lines()
     save(r, lines=lines)
 
     # Load all line UIDs in memory
@@ -182,7 +181,7 @@ def redis_update_infrastructure(db=0):
 
     # Use line UID to scrape individual lines
     for line in lines:
-        stops = scrape_line.scrape_line(line)
+        stops = scraper.scrape_line(line)
         save(r, stops=stops)
 
     # Save database to memory
