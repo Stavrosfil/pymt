@@ -27,7 +27,7 @@ def main():
         stops = ro.get_line_stops(SELECTED_LINES)
         logging.info("Stops loaded from Redis: {}".format(len(stops)))
     except Exception as e:
-        logging.error("Failed to fetch data from Redis client: {}".format(e))
+        logging.exception("Failed to fetch data from Redis client: {}".format(e))
         sys.exit()
 
     try:
@@ -35,7 +35,7 @@ def main():
         influx_client = InfluxDBClient(INFLUX_URI, INFLUX_PORT)
         logging.info("Client initialized successfully")
     except Exception as e:
-        logging.error("Failed to initialize InfluxDB client: {}".format(e))
+        logging.exception("Failed to initialize InfluxDB client: {}".format(e))
         sys.exit()
 
     try:
@@ -47,7 +47,7 @@ def main():
         influx_client.switch_database(INFLUX_DB)
         logging.info("Successfully switched to: {}".format(INFLUX_DB))
     except Exception as e:
-        logging.error("Could not switch to {}: {}".format(INFLUX_DB, e))
+        logging.exception("Could not switch to {}: {}".format(INFLUX_DB, e))
         sys.exit()
 
     start_loop(stops, influx_client)
@@ -66,14 +66,14 @@ def start_loop(stops, influx_client):
             responses = async_requests.get_stops([s.uid for s in stops])
             logging.info("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
         except Exception as e:
-            logging.error("There was an exception while getting data from the server: {}".format(e))
+            logging.exception("There was an exception while getting data from the server: {}".format(e))
 
         if responses != []:
             for response, stop in zip(responses, stops):
                 try:
                     stop.update(response)
                 except Exception as e:
-                    logging.error("There was an exception while parsing received response: {}".format(e))
+                    logging.exception("There was an exception while parsing received response: {}".format(e))
 
         saveToInflux(influx_client, stops)
 
@@ -114,7 +114,7 @@ def saveToInflux(client, stops):
         # print(json_body)
         logging.info("Successfully written in {} seconds".format(time.time() - time2))
     except Exception as e:
-        logging.error("There was an error writing to the database: {}".format(e))
+        logging.exception("There was an error writing to the database: {}".format(e))
 
 
 if __name__ == '__main__':
