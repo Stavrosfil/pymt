@@ -15,7 +15,11 @@ def main():
     INFLUX_PORT = 8089
     INFLUX_DB = 'bus_arrivals'
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(filename='pymt.log',
+                        filemode='w',
+                        format='%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s',
+                        datefmt='%d-%b-%y %H:%M:%S',
+                        level=logging.INFO)
 
     try:
         logging.info("Loading stops for lines: {}".format(SELECTED_LINES))
