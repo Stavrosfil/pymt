@@ -2,6 +2,7 @@ import async_requests
 import time
 from influxdb import InfluxDBClient
 import redis_operations as ro
+import logging
 
 '''
 A script to analyze a selected stop and output the data to an InfluxDB server.
@@ -23,25 +24,27 @@ def main():
     client.create_database('bus_arrivals')
     client.switch_database('bus_arrivals')
 
+    logging.basicConfig(level=logging.INFO)
+
     loop_timer = time.time()
 
     while True:
 
-        print("\n>>> Quering async requests to server...")
+        logging.info("Quering async requests to server...")
         time1 = time.time()
 
         try:
             responses = async_requests.get_stops([s.uid for s in stops])
-            print("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
+            logging.info("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
         except Exception as e:
-            print("There was an exception while getting data from the server: {}".format(e))
+            logging.error("There was an exception while getting data from the server: {}".format(e))
 
         if responses != []:
             for response, stop in zip(responses, stops):
                 try:
                     stop.update(response)
                 except Exception as e:
-                    print("There was an exception while parsing received response: {}".format(e))
+                    logging.error("There was an exception while parsing received response: {}".format(e))
 
         saveToInflux(client, stops)
 
@@ -50,7 +53,7 @@ def main():
 
 def saveToInflux(client, stops):
 
-    print("\n>>> Writing data to influxdb server...")
+    logging.info("Writing data to influxdb server...")
     time2 = time.time()
 
     json_body = []
@@ -80,9 +83,9 @@ def saveToInflux(client, stops):
     try:
         client.write_points(json_body)
         # print(json_body)
-        print("Files successfully written in {} seconds".format(time.time() - time2))
+        logging.info("Files successfully written in {} seconds".format(time.time() - time2))
     except Exception as e:
-        print("There was an error writing to the database: {}".format(e))
+        logging.error("There was an error writing to the database: {}".format(e))
 
 
 if __name__ == '__main__':
