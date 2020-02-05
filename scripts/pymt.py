@@ -3,28 +3,48 @@ import time
 from influxdb import InfluxDBClient
 import redis_operations as ro
 import logging
-
-'''
-A script to analyze a selected stop and output the data to an InfluxDB server.
-
-TODO: Input is a line or a stop?
-'''
-
-stop_dirs = {}
+import sys
 
 
 def main():
 
-    SELECTED_LINES = ['01N', '01X', '02K', '03K', '10', '07', '31']
     # SELECTED_LINES = ro.get_all_lines()[:50]
-    stops = ro.get_line_stops(SELECTED_LINES)
-    print(stops)
 
-    client = InfluxDBClient('localhost', 8089)
-    client.create_database('bus_arrivals')
-    client.switch_database('bus_arrivals')
+    SELECTED_LINES = ['01N', '01X', '02K', '03K', '10', '07', '31']
+    INFLUX_URI = 'localhost'
+    INFLUX_PORT = 8089
+    INFLUX_DB = 'bus_arrivals'
 
     logging.basicConfig(level=logging.INFO)
+
+    try:
+        logging.info("Loading stops for lines: {}".format(SELECTED_LINES))
+        logging.info("Initializing redis client...")
+        stops = ro.get_line_stops(SELECTED_LINES)
+        logging.info("Stops loaded from Redis: {}".format(len(stops)))
+    except Exception as e:
+        logging.error("Failed to fetch data from Redis client: {}".format(e))
+        sys.exit()
+
+    try:
+        logging.info("Initializing InfluxDB client: {}:{}".format(INFLUX_URI, INFLUX_PORT))
+        client = InfluxDBClient(INFLUX_URI, INFLUX_PORT)
+        logging.info("Client initialized successfully")
+    except Exception as e:
+        logging.error("Failed to initialize InfluxDB client: {}".format(e))
+        sys.exit()
+
+    try:
+        dbs = client.get_list_database()
+        if {'name': 'bus_arrivals'} not in dbs:
+            logging.info("Creating database: {}".format(INFLUX_DB))
+            client.create_database(INFLUX_DB)
+        logging.info("Switching to database: {}".format(INFLUX_DB))
+        client.switch_database(INFLUX_DB)
+        logging.info("Successfully switched to: {}".format(INFLUX_DB))
+    except Exception as e:
+        logging.error("Could not switch to {}: {}".format(INFLUX_DB, e))
+        sys.exit()
 
     loop_timer = time.time()
 
