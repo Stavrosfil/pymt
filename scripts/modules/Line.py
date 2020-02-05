@@ -1,6 +1,6 @@
 import re
 import bs4 as beautifulSoup
-import oasth_parsing as oasth_parser
+import parser
 
 
 class Line:
@@ -14,7 +14,7 @@ class Line:
         self.params = params
 
         if html_payload is not None:
-            oasth_parser.parse_line(self, payload=html_payload)
+            parser.parse_line(self, payload=html_payload)
 
         if base_url is not None:
             self.generate_url(base_url)
