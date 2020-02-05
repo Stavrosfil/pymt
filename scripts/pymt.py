@@ -16,7 +16,7 @@ def main():
     INFLUX_DB = 'bus_arrivals'
 
     logging.basicConfig(filename='pymt.log',
-                        filemode='w',
+                        filemode='a',
                         format='%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s',
                         datefmt='%d-%b-%y %H:%M:%S',
                         level=logging.INFO)
@@ -32,29 +32,34 @@ def main():
 
     try:
         logging.info("Initializing InfluxDB client: {}:{}".format(INFLUX_URI, INFLUX_PORT))
-        client = InfluxDBClient(INFLUX_URI, INFLUX_PORT)
+        influx_client = InfluxDBClient(INFLUX_URI, INFLUX_PORT)
         logging.info("Client initialized successfully")
     except Exception as e:
         logging.error("Failed to initialize InfluxDB client: {}".format(e))
         sys.exit()
 
     try:
-        dbs = client.get_list_database()
+        dbs = influx_client.get_list_database()
         if {'name': 'bus_arrivals'} not in dbs:
             logging.info("Creating database: {}".format(INFLUX_DB))
-            client.create_database(INFLUX_DB)
+            influx_client.create_database(INFLUX_DB)
         logging.info("Switching to database: {}".format(INFLUX_DB))
-        client.switch_database(INFLUX_DB)
+        influx_client.switch_database(INFLUX_DB)
         logging.info("Successfully switched to: {}".format(INFLUX_DB))
     except Exception as e:
         logging.error("Could not switch to {}: {}".format(INFLUX_DB, e))
         sys.exit()
 
+    start_loop(stops, influx_client)
+
+
+def start_loop(stops, influx_client):
+
     loop_timer = time.time()
 
     while True:
 
-        logging.info("Quering async requests to server...")
+        logging.info("Quering async requests to OASTh...")
         time1 = time.time()
 
         try:
@@ -70,14 +75,14 @@ def main():
                 except Exception as e:
                     logging.error("There was an exception while parsing received response: {}".format(e))
 
-        saveToInflux(client, stops)
+        saveToInflux(influx_client, stops)
 
         time.sleep(32.0 - ((time.time() - loop_timer) % 32.0))
 
 
 def saveToInflux(client, stops):
 
-    logging.info("Writing data to influxdb server...")
+    logging.info("Writing to InfluxDB...")
     time2 = time.time()
 
     json_body = []
@@ -107,7 +112,7 @@ def saveToInflux(client, stops):
     try:
         client.write_points(json_body)
         # print(json_body)
-        logging.info("Files successfully written in {} seconds".format(time.time() - time2))
+        logging.info("Successfully written in {} seconds".format(time.time() - time2))
     except Exception as e:
         logging.error("There was an error writing to the database: {}".format(e))
 
