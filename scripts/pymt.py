@@ -59,14 +59,16 @@ def start_loop(stops, influx_client):
 
     while True:
 
-        logging.info("Quering async requests to OASTh...")
-        time1 = time.time()
+        timer_requests = time.time()
 
         try:
+            logging.info("Quering async requests to OASTh...")
             responses = async_requests.get_stops([s.uid for s in stops])
-            logging.info("Received {} responses in {} seconds".format(len(responses), time.time() - time1))
+            logging.info("Received {} responses in {} seconds".format(len(responses), time.time() - timer_requests))
         except Exception as e:
             logging.exception("There was an exception while getting data from the server: {}".format(e))
+
+        timer_parsing = time.time()
 
         if responses != []:
             for response, stop in zip(responses, stops):
@@ -74,6 +76,8 @@ def start_loop(stops, influx_client):
                     stop.update(response)
                 except Exception as e:
                     logging.exception("There was an exception while parsing received response: {}".format(e))
+
+        logging.info("Parsed responses in: {} seconds".format(len(responses), time.time() - timer_parsing))
 
         saveToInflux(influx_client, stops)
 
