@@ -2,24 +2,20 @@ import async_requests
 import time
 from influxdb import InfluxDBClient
 import redis_operations as ro
-import logging
+from default_logger import logging
+# import logging
 import sys
 
 
 def main():
 
     # SELECTED_LINES = ro.get_all_lines()[:50]
+    logging.info("Initializing redis client...")
 
     SELECTED_LINES = ['01N', '01X', '02K', '03K', '10', '07', '31']
     INFLUX_URI = 'localhost'
     INFLUX_PORT = 8089
     INFLUX_DB = 'bus_arrivals'
-
-    logging.basicConfig(filename='pymt.log',
-                        filemode='a',
-                        format='%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s',
-                        datefmt='%d-%b-%y %H:%M:%S',
-                        level=logging.INFO)
 
     try:
         logging.info("Loading stops for lines: {}".format(SELECTED_LINES))
@@ -77,7 +73,7 @@ def start_loop(stops, influx_client):
                 except Exception as e:
                     logging.exception("There was an exception while parsing received response: {}".format(e))
 
-        logging.info("Parsed responses in: {} seconds".format(len(responses), time.time() - timer_parsing))
+        logging.info("Parsed responses in: {} seconds".format(time.time() - timer_parsing))
 
         saveToInflux(influx_client, stops)
 
