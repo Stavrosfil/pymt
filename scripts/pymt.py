@@ -15,7 +15,7 @@ def main():
 
     SELECTED_LINES = ['01N', '01X', '02K', '03K', '10', '07', '31']
     INFLUX_URI = 'localhost'
-    INFLUX_PORT = 8089
+    INFLUX_PORT = 8086
     INFLUX_DB = 'bus_arrivals'
 
     try:
