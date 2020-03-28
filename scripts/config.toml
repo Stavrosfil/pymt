@@ -1,0 +1,14 @@
+[pymt]
+selected_lines = ["01N", "01X", "02K", "03K", "10", "07", "31"]
+
+
+[influxdb]
+uri = "localhost"
+port = 8086
+db = "bus_arrivals"
+
+
+[redis]
+host = "localhost"
+port = 6379
+db = 0
