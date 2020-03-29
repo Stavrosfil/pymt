@@ -1,12 +1,10 @@
-import async_requests
-import time
+import pymt
 from influxdb import InfluxDBClient
-import redis_operations as ro
-import default_logger
 import sys
 import toml
+import time
 
-logger = default_logger.logger
+logger = pymt.default_logger.logger
 config = toml.load("config.toml")
 
 
@@ -22,7 +20,7 @@ def main():
     try:
         logger.info("Loading stops for lines: {}".format(_selected_lines))
         logger.info("Initializing redis client...")
-        stops = ro.get_line_stops(_selected_lines)
+        stops = pymt.redis_operations.get_line_stops(_selected_lines)
         logger.info("Stops loaded from Redis: {}".format(len(stops)))
     except Exception as e:
         logger.exception("Failed to fetch data from Redis client: {}".format(e))
@@ -60,7 +58,7 @@ def start_loop(stops, influx_client):
 
         try:
             logger.info("Quering async requests to OASTh...")
-            responses = async_requests.get_stops([s.uid for s in stops])
+            responses = pymt.async_requests.get_stops([s.uid for s in stops])
             logger.info("Received {} responses in {} seconds".format(len(responses), time.time() - timer_requests))
         except Exception as e:
             logger.exception("There was an exception while getting data from the server: {}".format(e))
@@ -89,7 +87,7 @@ def saveToInflux(client, stops):
 
     for stop in stops:
 
-        if (stop is not None):
+        if stop is not None:
 
             for bus in stop.buses:
                 json_body.append(

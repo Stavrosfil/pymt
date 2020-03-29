@@ -1,6 +1,6 @@
-from modules import Bus as Bus
-from modules import Stop as Stop
-from modules import Line as Line
+from pymt import Bus as Bus
+from pymt import Stop as Stop
+from pymt import Line as Line
 from bs4 import BeautifulSoup
 import re
 import time

@@ -1,6 +1,6 @@
-import scraper
+from pymt import scraper
 import redis
-from modules import Stop
+from pymt import Stop
 import toml
 
 
