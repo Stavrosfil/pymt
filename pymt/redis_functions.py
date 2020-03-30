@@ -1,8 +1,7 @@
-from pymt import scraper
 import redis
-from pymt import Stop
+from pymt import Stop, default_logger, oasth_parser, scraper
 import toml
-
+import sys
 
 """
 A script to communicate with the local Redis database server.
@@ -37,14 +36,22 @@ stop_example = {
 """
 
 
-# def main():
-#     SELECTED_LINES = ['01N', '02K', '03K']
-#     stops = get_line_stops(SELECTED_LINES)
-#     redis_update_infrastructure()
-#     print(stops)
+def load_stops(selected_lines):
+    logger = default_logger.logger
+
+    try:
+        logger.info("Loading stops for lines: {}".format(selected_lines))
+        logger.info("Initializing redis client...")
+        stops = get_line_stops(selected_lines)
+        logger.info("Stops loaded from Redis: {}".format(len(stops)))
+    except Exception as e:
+        logger.exception("Failed to fetch data from Redis client: {}".format(e))
+        sys.exit()
+
+    return stops
 
 
-def connect():
+def init():
     """Creates the connection object to the database and prints basic information to the console.
 
     Arguments:
@@ -62,6 +69,7 @@ def connect():
     r = redis.Redis(host=_host, port=_port, db=_db)
     return r
 
+
 # ---------------------------------------------------------------------------- #
 #                                    SAVING                                    #
 # ---------------------------------------------------------------------------- #
@@ -75,7 +83,6 @@ def save_stops(r, stops):
     """
 
     for stop in stops:
-
         # e.g 's819': Stop 819
         suid = 'stop{}'.format(stop.uid)
         params = stop.params
@@ -99,18 +106,16 @@ def save_stops(r, stops):
 
 
 def save_lines(r, lines):
-
     for line in lines:
-
         # e.g. 'l02k': Line O2K
         luid = 'line{}'.format(line.uid)
         params = line.params
 
         # Add parameters to the hash
         line_attributes = {
-            'uid':     line.uid,
-            'name':    line.name,
-            'number':  line.number,
+            'uid': line.uid,
+            'name': line.name,
+            'number': line.number,
         }
         line_attributes.update(params)
         r.hmset(luid, line_attributes)
@@ -121,7 +126,7 @@ def save_lines(r, lines):
 
 def save(r=None, db=0, stops=None, lines=None):
     if r is None:
-        r = connect(database=db)
+        r = init(database=db)
     if lines is not None:
         save_lines(r, lines)
     if stops is not None:
@@ -134,7 +139,6 @@ def save(r=None, db=0, stops=None, lines=None):
 
 
 def get_line_stops(selected_lines, db=0):
-
     selected_stops = []
 
     # Initialize Redis client object
@@ -158,7 +162,6 @@ def get_line_stops(selected_lines, db=0):
 
 
 def get_all_lines(db=0):
-
     # Initialize Redis client object
     r = redis.Redis(host='localhost', port=6379, db=db)
 
@@ -171,7 +174,6 @@ def get_all_lines(db=0):
 
 
 def redis_update_infrastructure(db=0):
-
     # Initialize Redis client object
     r = redis.Redis(host='localhost', port=6379, db=db)
 
@@ -192,7 +194,6 @@ def redis_update_infrastructure(db=0):
 
     # Save database to memory
     r.save()
-
 
 # if __name__ == "__main__":
 #     main()

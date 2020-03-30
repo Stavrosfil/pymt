@@ -2,11 +2,11 @@
 
 class Bus:
 
-    def __init__(self, bus_id, arival, line_description, line_number, timestamp):
-        self.bus_id = bus_id
+    def __init__(self, bus_uuid, arrival, line_description, line_number, timestamp):
+        self.bus_id = bus_uuid
         self.line_description = line_description
         self.line_number = line_number
-        self.arival = arival
+        self.arrival = arrival
         self.timestamp = timestamp
 
     # Not really needed.
@@ -14,5 +14,5 @@ class Bus:
         return {'bus_id': self.bus_id,
                 'line_description': self.line_description,
                 'line_number': self.line_number,
-                'arival': self.arival,
-                'timestamp': timestamp}
+                'arrival': self.arrival,
+                'timestamp': self.timestamp}
