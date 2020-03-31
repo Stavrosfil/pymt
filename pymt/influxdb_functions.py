@@ -5,7 +5,7 @@ import time
 import toml
 import sys
 
-config = toml.load("./config.toml")
+config = toml.load("config.toml")
 logger = default_logger.logger
 
 _influx_uri = config['influxdb']['uri']
@@ -50,21 +50,20 @@ def save_to_influx(client, stops: [Stop]):
                     {
                         "measurement": "bus_arrival",
                         "tags": {
-                            "bus_id": bus.bus_id,
+                            "bus_id": bus.bus_uuid,
                             "line_number": bus.line_number,
                             "stop_id": stop.uid,
                             "direction": stop.params['dir']
                         },
                         "time": bus.timestamp,
                         "fields": {
-                            "estimated_arrival": bus.arival
+                            "estimated_arrival": bus.arrival
                         }
                     }
                 )
 
     try:
         client.write_points(json_body)
-        # print(json_body)
         logger.info("Successfully written in {} seconds".format(time.time() - time2))
     except Exception as e:
         logger.exception("There was an error writing to the database: {}".format(e))
