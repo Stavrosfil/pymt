@@ -1,6 +1,7 @@
 html5lib
-beautufulsoup4
+beautifulsoup4
 influxdb
 redis
 aiohttp
 requests
+toml

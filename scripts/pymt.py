@@ -4,32 +4,33 @@ from influxdb import InfluxDBClient
 import redis_operations as ro
 import default_logger
 import sys
+import toml
 
 logger = default_logger.logger
+config = toml.load("config.toml")
 
 
 def main():
-
-    # SELECTED_LINES = ro.get_all_lines()[:50]
+    # _selected_lines = ro.get_all_lines()[:50]
     logger.info("Initializing redis client...")
 
-    SELECTED_LINES = ['01N', '01X', '02K', '03K', '10', '07', '31']
-    INFLUX_URI = 'localhost'
-    INFLUX_PORT = 8086
-    INFLUX_DB = 'bus_arrivals'
+    _selected_lines = config['pymt']['selected_lines']
+    _influx_uri = config['influxdb']['uri']
+    _influx_port = config['influxdb']['port']
+    _influx_db = config['influxdb']['db']
 
     try:
-        logger.info("Loading stops for lines: {}".format(SELECTED_LINES))
+        logger.info("Loading stops for lines: {}".format(_selected_lines))
         logger.info("Initializing redis client...")
-        stops = ro.get_line_stops(SELECTED_LINES)
+        stops = ro.get_line_stops(_selected_lines)
         logger.info("Stops loaded from Redis: {}".format(len(stops)))
     except Exception as e:
         logger.exception("Failed to fetch data from Redis client: {}".format(e))
         sys.exit()
 
     try:
-        logger.info("Initializing InfluxDB client: {}:{}".format(INFLUX_URI, INFLUX_PORT))
-        influx_client = InfluxDBClient(INFLUX_URI, INFLUX_PORT)
+        logger.info("Initializing InfluxDB client: {}:{}".format(_influx_uri, _influx_port))
+        influx_client = InfluxDBClient(_influx_uri, _influx_port)
         logger.info("Client initialized successfully")
     except Exception as e:
         logger.exception("Failed to initialize InfluxDB client: {}".format(e))
@@ -38,20 +39,19 @@ def main():
     try:
         dbs = influx_client.get_list_database()
         if {'name': 'bus_arrivals'} not in dbs:
-            logger.info("Creating database: {}".format(INFLUX_DB))
-            influx_client.create_database(INFLUX_DB)
-        logger.info("Switching to database: {}".format(INFLUX_DB))
-        influx_client.switch_database(INFLUX_DB)
-        logger.info("Successfully switched to: {}".format(INFLUX_DB))
+            logger.info("Creating database: {}".format(_influx_db))
+            influx_client.create_database(_influx_db)
+        logger.info("Switching to database: {}".format(_influx_db))
+        influx_client.switch_database(_influx_db)
+        logger.info("Successfully switched to: {}".format(_influx_db))
     except Exception as e:
-        logger.exception("Could not switch to {}: {}".format(INFLUX_DB, e))
+        logger.exception("Could not switch to {}: {}".format(_influx_db, e))
         sys.exit()
 
     start_loop(stops, influx_client)
 
 
 def start_loop(stops, influx_client):
-
     loop_timer = time.time()
 
     while True:
@@ -82,7 +82,6 @@ def start_loop(stops, influx_client):
 
 
 def saveToInflux(client, stops):
-
     logger.info("Writing to InfluxDB...")
     time2 = time.time()
 
@@ -90,10 +89,9 @@ def saveToInflux(client, stops):
 
     for stop in stops:
 
-        if(stop is not None):
+        if (stop is not None):
 
             for bus in stop.buses:
-
                 json_body.append(
                     {
                         "measurement": "busArival",

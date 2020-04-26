@@ -1,6 +1,7 @@
 import scraper
 import redis
 from modules import Stop
+import toml
 
 
 """
@@ -43,7 +44,7 @@ stop_example = {
 #     print(stops)
 
 
-def connect(database=0):
+def connect():
     """Creates the connection object to the database and prints basic information to the console.
 
     Arguments:
@@ -52,8 +53,13 @@ def connect(database=0):
     Returns:
         Redis object -- the initialized and connected redis object.
     """
+    config = toml.load("config.toml")
 
-    r = redis.Redis(host='localhost', port=6379, db=database)
+    _host = config['redis']['host']
+    _port = config['redis']['port']
+    _db = config['redis']['db']
+
+    r = redis.Redis(host=_host, port=_port, db=_db)
     return r
 
 # ---------------------------------------------------------------------------- #
