@@ -1,6 +1,6 @@
-from modules import Bus as Bus
-from modules import Stop as Stop
-from modules import Line as Line
+from pymt import Bus as Bus
+from pymt import Stop as Stop
+from pymt import Line as Line
 from bs4 import BeautifulSoup
 import re
 import time
@@ -11,21 +11,19 @@ import time
 # ---------------------------------------------------------------------------- #
 
 def parse_stop_buses(payload):
-
     soup = BeautifulSoup(payload, 'html5lib')
     buses = []
 
     # If we got buses in this stop
-    if (soup.find('div', attrs={'class': 'err'}) is None):
-        payload_arivals = soup.find('div', attrs={'class': 'menu'})
-        parsed_buses = parse_buses(payload_arivals)
+    if soup.find('div', attrs={'class': 'err'}) is None:
+        payload_arrivals = soup.find('div', attrs={'class': 'menu'})
+        parsed_buses = parse_buses(payload_arrivals)
         buses = parsed_buses
 
     return buses
 
 
 def parse_stop(self, payload, uid):
-
     soup = BeautifulSoup(payload, 'html5lib')
 
     name = soup.find('div', attrs={'class': 'title'}).text[:-1]
@@ -33,13 +31,14 @@ def parse_stop(self, payload, uid):
     self.buses = []
 
     # If we got buses in this stop
-    if (soup.find('div', attrs={'class': 'err'}) is None):
-        payload_arivals = soup.find('div', attrs={'class': 'menu'})
-        parsed_buses = parse_buses(payload_arivals)
+    if soup.find('div', attrs={'class': 'err'}) is None:
+        payload_arrivals = soup.find('div', attrs={'class': 'menu'})
+        parsed_buses = parse_buses(payload_arrivals)
         self.buses = parsed_buses
 
     self.uid = uid
     self.name = name
+
 
 # ---------------------------------------------------------------------------- #
 #                                  BUS PARSING                                 #
@@ -48,13 +47,13 @@ def parse_stop(self, payload, uid):
 # TODO: use bs4 for every parsing inside the file
 
 
-def parse_buses(bus_arivals_html):
+def parse_buses(bus_arrivals_html):
     """
     Parses a given OASTH based HTML string containing the incoming buses and timings from a specific Stop.
     Returns: A list of bus objects.
     """
 
-    buses_html = [b for b in bus_arivals_html.find_all('h3')]
+    buses_html = [b for b in bus_arrivals_html.find_all('h3')]
 
     return [parse_bus(b) for b in buses_html]
 
@@ -94,8 +93,8 @@ def parse_bus(bus_html):
     #    52'
     # </span>
     # Delete all the spaces trimming the first and two last characters. ' 5' '
-    # arival = re.search(r'\d+', bus_time).group()
-    arival = int(bus_html.find('span', attrs={'class': 'sptime'}).text[1:-2])
+    # arrival = re.search(r'\d+', bus_time).group()
+    arrival = int(bus_html.find('span', attrs={'class': 'sptime'}).text[1:-2])
 
     # Split in : and get the bus number (01X).
     # 01X:Κ.Τ.Ε.Λ.-ΑΕΡΟΔΡΟΜΙΟ ΟΧΗΜΑ 0861
@@ -112,7 +111,7 @@ def parse_bus(bus_html):
     # Use the current time to correctly input the bus to the database
     timestamp = time.time_ns()
 
-    return Bus.Bus(bus_id, arival, line_description, line_number, timestamp)
+    return Bus.Bus(bus_id, arrival, line_description, line_number, timestamp)
 
 
 # ---------------------------------------------------------------------------- #
