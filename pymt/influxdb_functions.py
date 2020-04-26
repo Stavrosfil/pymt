@@ -1,4 +1,4 @@
-from pymt import Line, Bus, Stop
+from pymt.models.oasth import Stop
 from pymt import default_logger
 from influxdb import InfluxDBClient
 import time

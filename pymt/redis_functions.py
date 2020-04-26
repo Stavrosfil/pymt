@@ -1,5 +1,7 @@
 import redis
-from pymt import Stop, default_logger, oasth_parser, scraper
+from pymt import default_logger
+from pymt.models.oasth import Stop
+from pymt.models.oasth.scraper import scraper
 import toml
 import sys
 
@@ -194,6 +196,3 @@ def redis_update_infrastructure(db=0):
 
     # Save database to memory
     r.save()
-
-# if __name__ == "__main__":
-#     main()
