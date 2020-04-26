@@ -1,4 +1,4 @@
-from . import async_requests, default_logger, oasth_parser, redis_functions, scraper, influxdb_functions, redis_functions
+from . import async_requests, default_logger, redis_functions, influxdb_functions, redis_functions
 
 import toml
 import time
