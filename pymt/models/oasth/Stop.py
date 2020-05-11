@@ -1,4 +1,5 @@
-from pymt.models.oasth.scraper import oasth_parser
+from pymt.models.oasth.Bus import Bus
+import json
 
 
 class Stop:
@@ -31,7 +32,7 @@ class Stop:
         if buses is None:
             buses = []
         if payload is not None:
-            oasth_parser.parse_stop(self, payload, uid)
+            self.parse_stop(payload)
 
         else:
             self.params = params
@@ -44,5 +45,12 @@ class Stop:
     def add_bus(self, bus):
         self.buses.append(bus)
 
-    def update(self, payload):
-        self.buses = oasth_parser.parse_stop_buses(payload)
+    def parse_stop(self, payload):
+        self.buses = []
+        if payload:
+            for bus in payload:
+                self.buses.append(Bus(bus))
+
+        #
+        # pass
+        # self.buses = oasth_parser.parse_stop_buses(payload)

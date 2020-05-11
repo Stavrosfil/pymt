@@ -1,4 +1,5 @@
-from . import async_requests, default_logger, redis_functions, influxdb_functions, redis_functions
+from . import default_logger, redis_functions, influxdb_functions, redis_functions
+from pymt.models.oasth import async_requests
 
 import toml
 import time

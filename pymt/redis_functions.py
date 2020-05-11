@@ -158,7 +158,7 @@ def get_line_stops(selected_lines, db=0):
 
     for uid in unique_stop_uids:
         redis_stop = r.hgetall('stop{}'.format(uid))
-        selected_stops.append(Stop.Stop(uid=uid, params={'dir': int(redis_stop[b'dir'])}))
+        selected_stops.append(Stop.Stop(uid=uid, name=redis_stop[b'name'].decode("utf-8"), params={'dir': int(redis_stop[b'dir'])}))
 
     return selected_stops
 

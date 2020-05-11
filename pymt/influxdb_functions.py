@@ -50,8 +50,8 @@ def save_to_influx(client, stops: [Stop]):
                     {
                         "measurement": "bus_arrival",
                         "tags": {
-                            "bus_id": bus.bus_uuid,
-                            "line_number": bus.line_number,
+                            "bus_id": bus.uuid,
+                            "line_number": bus.route_code,
                             "stop_id": stop.uid,
                             "direction": stop.params['dir']
                         },
