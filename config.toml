@@ -1,5 +1,6 @@
 [pymt]
-selected_lines = ["01N", "01X", "02K", "03K", "10", "07", "31"]
+#selected_lines = ["01N", "01X", "02K", "03K", "10", "07", "31"]
+selected_lines = ["01X", "02K"]
 
 
 [influxdb]

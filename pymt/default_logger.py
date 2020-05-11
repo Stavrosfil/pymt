@@ -1,7 +1,5 @@
-
-# logging_example.py
-
 import logging
+import time
 
 # Create a custom logger
 logger = logging.getLogger(__name__)
@@ -23,3 +21,22 @@ f_handler.setFormatter(f_format)
 # Add handlers to the logger
 logger.addHandler(c_handler)
 logger.addHandler(f_handler)
+
+
+def log_time(message):
+
+    def inner(method):
+        def timed(*args, **kw):
+            ts = time.time()
+            result = method(*args, **kw)
+            te = time.time()
+            if 'log_time' in kw:
+                name = kw.get('log_name', method.__name__.upper())
+                kw['log_time'][name] = int((te - ts) * 1000)
+            else:
+                logger.info("{}: {} @ {}ms".format(message, method.__name__, (te - ts) * 1000))
+            return result
+
+        return timed
+
+    return inner
