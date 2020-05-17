@@ -4,7 +4,6 @@ import requests
 import zlib
 from ast import literal_eval as make_tuple
 from pymongo import MongoClient
-import folium
 
 lines = {}
 routes = {}
@@ -192,50 +191,4 @@ def organize():
         print("-" * 150)
         pass
 
-
 # organize()
-
-def get_route_stops_dict(name='31'):
-    # route = '31'
-    line = lines_db.find_one(dict(name=name))
-    # line = lines_db.find_one({'name': name})
-    print(line)
-    route = line.get('days')[0]
-    print(route)
-    # stops = route_stops_db.find(dict(route_id=route))
-    stop_ids = [s.get('stop_id') for s in route_stops_db.find(dict(route_id=route))]
-    pprint(stop_ids)
-
-
-def map_all_stops():
-    # m = folium.Map(location=[40.6211872, 22.9110079])
-    # m = folium.Map(location=[40.6211872, 22.9110079], tiles="cartodbdark_matter")
-    # m = folium.Map(location=[40.6211872, 22.9110079], tiles="Stamen Toner")
-    m = folium.Map(location=[40.6211872, 22.9110079], tiles="cartodbpositron")
-    # m = folium.Map(location=[40.6211872, 22.9110079], tiles="openstreetmap")
-
-    stops = stops_db.find()
-
-    for stop in stops:
-        folium.Circle(
-            radius=10,
-            location=(stop['lat'], stop['lon']),
-            popup=stop['desc_en'],
-            color='#3186cc',
-            fill=True,
-        ).add_to(m)
-        # folium.CircleMarker(
-        #     location=[stop['lat'], stop['lon']],
-        #     radius=50,
-        #     popup='Test',
-        #     color='#3186cc',
-        #     fill=True,
-        #     fill_color='#3186cc'
-        # ).add_to(m)
-
-    m.save("test.html")
-    m.render()
-
-
-map_all_stops()
-# get_route_stops_dict()
