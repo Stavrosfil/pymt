@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import requests
 import zlib
 from ast import literal_eval as make_tuple
@@ -143,16 +145,7 @@ def get_route_stops():
 
 # --------------------------------------------------------------------------------------
 
-# req_all()
-
-get_lines()
-get_routes()
-get_stops()
-get_route_stops()
-
 client = MongoClient('localhost', 27017)
-
-client.drop_database("pymt")
 
 db = client['pymt']
 
@@ -160,6 +153,28 @@ lines_db = db['lines']
 routes_db = db['routes']
 stops_db = db['stops']
 route_stops_db = db['route_stops']
+
+
+# req_all()
+
+def to_mongo():
+    client.drop_database("pymt")
+
+    get_lines()
+    get_routes()
+    get_stops()
+    get_route_stops()
+
+    lines_db.insert_many([line.__dict__ for line in lines.values()])
+    routes_db.insert_many([route.__dict__ for route in routes.values()])
+    stops_db.insert_many([stop.__dict__ for stop in stops.values()])
+    route_stops_db.insert_many([route_stop.__dict__ for route_stop in route_stops.values()])
+
+
+# to_mongo()
+
+
+# ----------------------------------------------------------------------------------
 
 
 def organize():
