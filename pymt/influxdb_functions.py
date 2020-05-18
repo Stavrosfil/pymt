@@ -80,14 +80,15 @@ def save_buses(client, buses):
                 {
                     "measurement": "bus_location",
                     "tags": {
-                        "bus_id": bus.uuid,
+                        "uuid": bus.uuid,
                         "route_code": bus.route_code,
-                        "geohash": ghh.encode(lng=bus.lon, lat=bus.lat, precision=6)
+                        "geohash": ghh.encode(lng=bus.lon, lat=bus.lat, precision=5)
                     },
                     "time": bus.timestamp,
                     "fields": {
                         "lon": bus.lon,
                         "lat": bus.lat,
+                        "geohash": ghh.encode(lng=bus.lon, lat=bus.lat, precision=5),
                     }
                 }
             )

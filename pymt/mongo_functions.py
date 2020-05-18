@@ -21,6 +21,7 @@ class CustomStop(object):
 class CustomLine(object):
     def __init__(self, d):
         self.__dict__ = d
+        self.stops = []
 
 
 # TODO: fix encoding in route names
