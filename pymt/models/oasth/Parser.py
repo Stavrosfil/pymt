@@ -1,7 +1,4 @@
-from pymt import Bus as Bus
-from pymt import Stop as Stop
-from pymt import Line as Line
-from bs4 import BeautifulSoup
+import pymt.models.oasth
 import re
 import time
 
@@ -10,15 +7,61 @@ import time
 #                                 STOP PARSING                                 #
 # ---------------------------------------------------------------------------- #
 
-def parse_stop_buses(payload):
-    soup = BeautifulSoup(payload, 'html5lib')
+def parse_stop_buses(response):
+    thing = [
+        [
+            {
+                "route_code": "2306",
+                "veh_code": "933",
+                "btime2": "16"
+
+            },
+            {
+                "route_code": "1355",
+                "veh_code": "910",
+                "btime2": "21"
+
+            },
+            {
+                "route_code": "2329",
+                "veh_code": "905",
+                "btime2": "34"
+
+            },
+            {
+                "route_code": "581",
+                "veh_code": "443",
+                "btime2": "34"
+
+            }
+
+        ],
+        [
+            {
+                "route_code": "143",
+                "veh_code": "456",
+                "btime2": "3"
+
+            },
+            {
+                "route_code": "1078",
+                "veh_code": "913",
+                "btime2": "21"
+
+            }
+
+        ]
+    ]
+
     buses = []
 
-    # If we got buses in this stop
-    if soup.find('div', attrs={'class': 'err'}) is None:
-        payload_arrivals = soup.find('div', attrs={'class': 'menu'})
-        parsed_buses = parse_buses(payload_arrivals)
-        buses = parsed_buses
+
+
+    # # If we got buses in this stop
+    # if soup.find('div', attrs={'class': 'err'}) is None:
+    #     payload_arrivals = soup.find('div', attrs={'class': 'menu'})
+    #     parsed_buses = parse_buses(payload_arrivals)
+    #     buses = parsed_buses
 
     return buses
 
@@ -59,7 +102,7 @@ def parse_buses(bus_arrivals_html):
 
 
 """
-Example of a bus details payload we receive in HTML:
+Example of a bus details payload we receive in JSON:
 ----------------------------------------------------
   <h3>
       <span class="sp1">
@@ -111,7 +154,7 @@ def parse_bus(bus_html):
     # Use the current time to correctly input the bus to the database
     timestamp = time.time_ns()
 
-    return Bus.Bus(bus_id, arrival, line_description, line_number, timestamp)
+    return pymt.models.oasth.Bus.Bus(bus_id, arrival, line_description, line_number, timestamp)
 
 
 # ---------------------------------------------------------------------------- #
@@ -119,15 +162,6 @@ def parse_bus(bus_html):
 # ---------------------------------------------------------------------------- #
 
 def parse_line_stops(payload):
-    soup = BeautifulSoup(payload, 'html5lib')
-    # print(soup.prettify())
-
-    # We get two menu divisions: start  -> dest
-    #                            dest   -> start
-    # This time the importand info is loaded with js, and is found under the 'menu' tag
-    # The only difference is that we discard the first menu division, because it belongs to the unloaded page.
-    line_directions = soup.find_all('div', attrs={'class': 'menu'})[1:]
-
     parsed_stops = []
 
     # Get all the individual stops for each direction.
@@ -146,25 +180,6 @@ def parse_line_stops(payload):
 
 
 def parse_line(self, payload):
-    """
-    Parses the given soup object and extracts line details.
-
-    Arguments:
-        line {soup object} -- A soup object parsed from the website response containing the tag <h3>
-
-    Example object:
-        <h3>
-            <a href = "http://m.oasth.gr/#index.php?md=4&amp;sn=2&amp;line=250&amp;dhm=">
-                <span class = "sp1">
-                    92R
-                </span>
-                <span class = "sp2">
-                    ΚΟΥΦΑΛΙΑ - ΡΑΧΩΝΑ
-                </span>
-            </a>
-        </h3>
-    """
-
     self.href = payload.find('a', href=True).get('href')
     self.uid = int(re.search(r'line=\d+', self.href).group()[5:])
     self.params = {}

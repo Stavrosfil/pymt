@@ -1,8 +1,7 @@
 from urllib.parse import urlparse, parse_qs
-from pymt import Stop as Stop
+from pymt.models.oasth import Stop as Stop
 import requests
 from bs4 import BeautifulSoup
-from pymt import Line as Line
 
 """
 Retrieve all the available lines from OASTH and save them (prefferably to Redis).

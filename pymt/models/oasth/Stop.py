@@ -1,9 +1,10 @@
-from pymt import oasth_parser
+from pymt.models.oasth.Bus import Bus
+import json
 
 
 class Stop:
 
-    def __init__(self, payload=None, url=None, uid=None, name='', buses=[], lines=[], params={}):
+    def __init__(self, payload=None, url=None, uid=None, name='', buses=None, lines=None, params=None):
         """Initialize a stop object with a beautifulSoup html one, using the telematics data received or manually.
 
         Keyword Arguments:
@@ -24,8 +25,14 @@ class Stop:
         # params['line']
         # params['dir']
 
+        if params is None:
+            params = {}
+        if lines is None:
+            lines = []
+        if buses is None:
+            buses = []
         if payload is not None:
-            oasth_parser.parse_stop(self, payload, uid)
+            self.parse_stop(payload)
 
         else:
             self.params = params
@@ -38,5 +45,12 @@ class Stop:
     def add_bus(self, bus):
         self.buses.append(bus)
 
-    def update(self, payload):
-        self.buses = oasth_parser.parse_stop_buses(payload)
+    def parse_stop(self, payload):
+        self.buses = []
+        if payload:
+            for bus in payload:
+                self.buses.append(Bus(bus))
+
+        #
+        # pass
+        # self.buses = oasth_parser.parse_stop_buses(payload)

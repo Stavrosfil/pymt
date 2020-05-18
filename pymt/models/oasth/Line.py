@@ -1,4 +1,4 @@
-import parser
+from pymt.models.oasth.scraper import oasth_parser as parser
 
 
 class Line:

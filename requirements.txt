@@ -5,3 +5,5 @@ redis
 aiohttp
 requests
 toml
+pymongo
+geohash-hilbert
