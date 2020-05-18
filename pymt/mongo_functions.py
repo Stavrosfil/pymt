@@ -36,3 +36,7 @@ def get_route_stops(name='31'):
 def get_line_by_name(name):
     line = CustomLine(lines_db.find_one(dict(name=name)))
     return line
+
+
+def get_all_lines():
+    return [CustomLine(l) for l in lines_db.find()]

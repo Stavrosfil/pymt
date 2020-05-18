@@ -1,7 +1,7 @@
 import time
 from pprint import pprint
 
-from pymt import logger, config, influxdb_functions, mongo_functions, redis_functions, api
+from pymt import default_logger, logger, config, influxdb_functions, mongo_functions, api, map
 from pymt import selected_lines
 from pymt.models.oasth import async_requests
 
@@ -21,10 +21,11 @@ def start_loop(stops, influx_client):
     loop_timer = time.time()
 
     while True:
-
         timer_requests = time.time()
 
         try:
+            # logger.log_time("Initiating requests")
+            # run()
             logger.info("Querying async requests to OASTh...")
             responses = async_requests.get_stops([s.uid for s in stops])
             logger.info("Received {} responses in {} seconds".format(len(responses), time.time() - timer_requests))
@@ -49,31 +50,60 @@ def start_loop(stops, influx_client):
 
 class CustomBus(object):
     def __init__(self, d):
-        self.__dict__ = d
+        # self.__dict__ = d
+        self.lon = float(d.get('CS_LNG'))
+        self.lat = float(d.get('CS_LAT'))
+        self.uuid = d.get('VEH_NO')
+        self.route_code = d.get('ROUTE_CODE')
+        self.timestamp = time.time_ns()
 
 
-# m = map.init_map()
+def time_function(func):
+    def wrapper():
+        start = time.time()
+        func()
+        print("Received {} responses in {} seconds".format("test", time.time() - start))
 
-for line in selected_lines:
-    print("Line:\t\t", line)
-    stops = mongo_functions.get_route_stops(line)
-    print("Stops:\t\t", len(stops))
+    return wrapper
 
-    line = mongo_functions.get_line_by_name(line)
 
-    print("Line days:\t", line.days)
-    stop_telematics = api.get_line_telematics(line)
+@default_logger.log_time("Request and process task")
+def run():
+    m = map.init_map()
     buses = []
-    if stop_telematics is not None:
-        for bus in stop_telematics:
-            print(bus)
-            bus = CustomBus(bus)
-            buses.append(bus)
-            coords = (bus.CS_LAT, bus.CS_LNG)
-            # map.plot_point(m, coords)
+    for line in selected_lines:
+        logger.debug("Line: {}".format(line))
+        stops = mongo_functions.get_route_stops(line)
+        logger.debug("Stops: {}".format(len(stops)))
 
-    # pprint(stop_telematics, indent=1)
+        line = mongo_functions.get_line_by_name(line)
+        logger.debug("Line days: {}".format(line.days))
+
+        # Get telematics
+
+        for day in range(2):
+            stop_telematics = api.get_line_telematics(line, day)
+
+            if stop_telematics is not None:
+                for bus in stop_telematics:
+                    bus = CustomBus(bus)
+                    buses.append(bus)
+                    map.plot_point(m, (bus.lat, bus.lon))
+                    logger.debug(bus.__dict__)
+
+        map.plot_route(m, stops, line=True)
+
+    map.save_map(m)
+    return buses
+
+
+if not selected_lines:
+    selected_lines = [l.name for l in mongo_functions.get_all_lines()]
+
+influx = influxdb_functions.init_influxdb()
+
+while True:
+    buses = run()
+    influxdb_functions.save_buses(influx, buses)
     print("-" * 100)
-    # map.plot_route(m, stops)
-
-# map.save_map(m)
+    time.sleep(15)
