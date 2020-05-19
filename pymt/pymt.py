@@ -67,7 +67,7 @@ def time_function(func):
     return wrapper
 
 
-@default_logger.log_time("Request and process task")
+@default_logger.timer("Getting bus telematics...")
 def get_buses(lines):
     buses = []
 
@@ -111,11 +111,11 @@ while True:
     buses = get_buses(lines)
     influxdb_functions.save_buses(influx, buses)
 
-    # m = map.init_map()
-    # [map.plot_route(m, line) for line in lines]
-    # for bus in buses:
-    #     map.plot_point(m, (bus.lat, bus.lon))
-    # map.save_map(m)
+    m = map.init_map()
+    [map.plot_route(m, line) for line in lines]
+    for bus in buses:
+        map.plot_bus(m, bus)
+    map.save_map(m)
 
     print("-" * 100)
     time.sleep(15)

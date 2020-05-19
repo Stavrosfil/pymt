@@ -1,8 +1,7 @@
 [pymt]
 #selected_lines = ["01N", "01X", "02K", "03K", "10", "07", "31"]
-#selected_lines = ["01Χ", "01N", "02Κ", "58", "07", "31", "27"]
-selected_lines = []
-
+selected_lines = ["01Χ", "01N", "02Κ", "58", "07", "31", "27"]
+#selected_lines = []
 
 [influxdb]
 uri = "localhost"
@@ -23,3 +22,21 @@ lines_db = "lines"
 routes_db = "routes"
 stops_db = "stops"
 route_stops_db = "route_stops"
+
+[map]
+enabled = true
+draw_lines = true
+draw_points = false
+draw_bus_points = true
+initial_zoom = 12
+map_styles = [
+    "cartodbdark_matter",
+    "Stamen Toner",
+    "cartodbpositron",
+    "openstreetmap",
+    "Mapbox Bright",
+    "stamenterrain",
+    "stamenwatercolor",
+]
+default_style = 2
+initial_location = [40.62, 23.0]
