@@ -13,15 +13,48 @@ logger.setLevel(logging.DEBUG)
 f_handler.setLevel(logging.WARNING)
 
 # Create formatters and add it to handlers
-# c_format = f_format = logging.Formatter('%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s')
-# c_format = f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
-c_format = f_format = logging.Formatter('[%(levelname)s] - %(message)s')
 c_handler.setFormatter(c_format)
 f_handler.setFormatter(f_format)
 
 # Add handlers to the logger
 logger.addHandler(c_handler)
 logger.addHandler(f_handler)
+
+
+def timer(message=None):
+    """Print the runtime of the decorated function"""
+
+    def inner(func):
+        @functools.wraps(func)
+        def wrapper_timer(*args, **kwargs):
+            if message:
+                logger.info("[{}]: {}".format(func.__name__, message))
+            else:
+                logger.info("[{}]: Running...".format(func.__name__))
+            start_time = time.perf_counter()  # 1
+            value = func(*args, **kwargs)
+            end_time = time.perf_counter()  # 2
+            run_time = end_time - start_time  # 3
+            logger.info(f"[{func.__name__}]: Finished in {run_time:.4f} secs")
+            return value
+
+        return wrapper_timer
+
+    return inner
+
+
+@timer()
+def custom_timer(func):
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()  # 1
+        value = func(*args, **kwargs)
+        end_time = time.perf_counter()  # 2
+        run_time = end_time - start_time  # 3
+        logger.info("Finished loop")
+        return value
+
+    return wrapper_timer
 
 
 def log_time(message):

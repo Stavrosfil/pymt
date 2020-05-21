@@ -6,4 +6,5 @@ aiohttp
 requests
 toml
 pymongo
-geohash-hilbert
+geohash2
+folium
