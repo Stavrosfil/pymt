@@ -1,4 +1,4 @@
 from pymt import pymt
 
 if __name__ == '__main__':
-    pymt
+    pymt.run()

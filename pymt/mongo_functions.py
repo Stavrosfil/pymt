@@ -15,11 +15,11 @@ route_stops_db = db[c['route_stops_db']]
 
 
 # TODO: fix encoding in route names
-def get_route_stops(name='31'):
-    line = lines_db.find_one(dict(name=name))
-    route = line.get('days')[0]
+def get_route_stops(route_id):
+    # line = lines_db.find_one(dict(name=name))
+    # route = line.get('days')[0]
     # stops = route_stops_db.find(dict(route_id=route))
-    stop_ids = [s.get('stop_id') for s in route_stops_db.find(dict(route_id=route))]
+    stop_ids = [s.get('stop_id') for s in route_stops_db.find(dict(route_id=route_id))]
     stops = [model.Stop(stops_db.find_one(dict(_id=s))) for s in stop_ids]
     return stops
 
