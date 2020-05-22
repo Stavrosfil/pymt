@@ -4,7 +4,7 @@ import pymt.models.oasth as model
 
 c = config['mongodb']
 
-client = MongoClient(c['uri'], c['port'])
+client = MongoClient(c['uri'])
 
 db = client[c['db']]
 

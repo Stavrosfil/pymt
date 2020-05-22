@@ -1,5 +1,22 @@
 import logging
 import time
+import functools
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+# c_format = f_format = logging.Formatter('%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s')
+# c_format = f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+c_format = f_format = logging.Formatter(f'{bcolors.WARNING}[%(levelname)s] {bcolors.HEADER}- %(message)s')
 
 # Create a custom logger
 logger = logging.getLogger(__name__)
@@ -39,37 +56,5 @@ def timer(message=None):
             return value
 
         return wrapper_timer
-
-    return inner
-
-
-@timer()
-def custom_timer(func):
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        start_time = time.perf_counter()  # 1
-        value = func(*args, **kwargs)
-        end_time = time.perf_counter()  # 2
-        run_time = end_time - start_time  # 3
-        logger.info("Finished loop")
-        return value
-
-    return wrapper_timer
-
-
-def log_time(message):
-    def inner(method):
-        def timed(*args, **kw):
-            ts = time.time()
-            result = method(*args, **kw)
-            te = time.time()
-            if 'log_time' in kw:
-                name = kw.get('log_name', method.__name__.upper())
-                kw['log_time'][name] = int((te - ts) * 1000)
-            else:
-                logger.info("{}: {} @ {:.5}s".format(message, method.__name__, (te - ts)))
-            return result
-
-        return timed
 
     return inner
