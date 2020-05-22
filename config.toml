@@ -15,7 +15,7 @@ port = 6379
 db = 0
 
 [mongodb]
-uri = "localhost"
+uri = "mongodb://username:password@host:27017/pymt?authSource=admin"
 port = 27017
 db = "pymt"
 lines_db = "lines"

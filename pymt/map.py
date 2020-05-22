@@ -52,23 +52,27 @@ def plot_bus(m, bus):
     ).add_to(m)
 
 
-def plot_route(m, line, draw_points=c.draw_points, draw_lines=c.draw_lines):
+def plot_route(m, line, days=None, draw_points=c.draw_points, draw_lines=c.draw_lines):
+    if days is None:
+        days = [0, 1]
     if line:
         coords = []
-        for stop in line.stops:
-            coord = (stop.lat, stop.lon)
-            coords.append(coord)
-            if draw_points:
-                folium.Circle(
-                    radius=50,
-                    location=coord,
-                    popup=stop.desc_el,
-                    tooltip=stop.desc_el,
-                    fill_color='#3186cc',
-                    color='clear',
-                    fill=True,
-                    fill_opacity=1,
-                ).add_to(m)
+        for day in days:
+            for stop in line.stops[day]:
+                if stop:
+                    coord = (stop.lat, stop.lon)
+                    coords.append(coord)
+                    if draw_points:
+                        folium.Circle(
+                            radius=50,
+                            location=coord,
+                            popup=stop.desc_el,
+                            tooltip=stop.desc_el,
+                            fill_color='#3186cc',
+                            color='clear',
+                            fill=True,
+                            fill_opacity=1,
+                        ).add_to(m)
         if draw_lines and coords:
             folium.PolyLine(coords, color="black", weight=2, opacity=0.3).add_to(m)
 

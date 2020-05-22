@@ -1,11 +1,7 @@
 import sys
-import time
-import geohash_hilbert as ghh
-
+import geohash2
 from influxdb import InfluxDBClient
-
-from pymt import logger, config
-from pymt.models.oasth import Stop
+from pymt import logger, config, default_logger
 
 _influx_uri = config['influxdb']['uri']
 _influx_port = config['influxdb']['port']
@@ -36,65 +32,31 @@ def init_influxdb():
     return influx_client
 
 
-def save_to_influx(client, stops):
-    logger.info("Writing to InfluxDB...")
-    time2 = time.time()
-
-    json_body = []
-
-    for stop in stops:
-        if stop is not None:
-            for bus in stop.buses:
-                json_body.append(
-                    {
-                        "measurement": "bus_arrival",
-                        "tags": {
-                            "bus_id": bus.uuid,
-                            "line_number": bus.route_code,
-                            "stop_id": stop.uid,
-                            "direction": stop.params['dir']
-                        },
-                        "time": bus.timestamp,
-                        "fields": {
-                            "estimated_arrival": bus.arrival
-                        }
-                    }
-                )
-
-    try:
-        client.write_points(json_body)
-        logger.info("Successfully written in {} seconds".format(time.time() - time2))
-    except Exception as e:
-        logger.exception("There was an error writing to the database: {}".format(e))
-
-
+@default_logger.timer("Writing to InfluxDB...")
 def save_buses(client, buses):
-    logger.info("Writing to InfluxDB...")
-    time2 = time.time()
-
     json_body = []
 
     for bus in buses:
         if bus is not None:
+            geohash = geohash2.encode(bus.lat, bus.lon, precision=7)
             json_body.append(
                 {
                     "measurement": "bus_location",
                     "tags": {
                         "uuid": bus.uuid,
                         "route_code": bus.route_code,
-                        "geohash": ghh.encode(lng=bus.lon, lat=bus.lat, precision=5)
+                        "geohash": geohash
                     },
                     "time": bus.timestamp,
                     "fields": {
                         "lon": bus.lon,
                         "lat": bus.lat,
-                        "geohash": ghh.encode(lng=bus.lon, lat=bus.lat, precision=5),
+                        "geohash": geohash,
                     }
                 }
             )
 
     try:
         client.write_points(json_body)
-        logger.info("Successfully written in {} seconds".format(time.time() - time2))
     except Exception as e:
         logger.exception("There was an error writing to the database: {}".format(e))
