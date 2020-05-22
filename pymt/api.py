@@ -2,6 +2,7 @@ import asyncio
 import concurrent.futures
 import requests
 from pymt import default_logger
+import pymt.models.oasth as model
 
 
 @default_logger.timer()

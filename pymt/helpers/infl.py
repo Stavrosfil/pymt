@@ -1,5 +1,4 @@
 import sys
-import time
 import geohash2
 from influxdb import InfluxDBClient
 from pymt import logger, config, default_logger

@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from pymt import config
+from pymt import config, selected_lines, default_logger, logger
 import pymt.models.oasth as model
 
 c = config['mongodb']
@@ -31,3 +31,17 @@ def get_line_by_name(name):
 
 def get_all_lines():
     return [model.Line(l) for l in lines_db.find()]
+
+
+@default_logger.timer("Loading selected lines from MongoDB")
+def load_lines(days, lines=selected_lines):
+    _lines = []
+    if not lines:
+        _lines = get_all_lines()
+    else:
+        _lines = [get_line_by_name(line_name) for line_name in lines]
+    [logger.debug(f"Selected lines: {l.__dict__}") for l in _lines]
+    for d in days:
+        for line in _lines:
+            line.stops[d] = get_route_stops(route_id=line.days[d])
+    return _lines
