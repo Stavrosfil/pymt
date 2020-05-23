@@ -1,4 +1,6 @@
 from pymongo import MongoClient
+
+import pymt.helpers.metadata
 from pymt import config, selected_lines, default_logger, logger
 import pymt.models.oasth as model
 
@@ -33,7 +35,7 @@ def get_all_lines():
     return [model.Line(l) for l in lines_db.find()]
 
 
-@default_logger.timer("Loading selected lines from MongoDB")
+@pymt.helpers.metadata.timer("Loading selected lines from MongoDB")
 def load_lines(days, lines=selected_lines):
     _lines = []
     if not lines:

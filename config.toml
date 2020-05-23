@@ -6,8 +6,7 @@ selected_lines = ["01Χ", "01N", "02Κ", "58", "07", "31", "27"]
 [influxdb]
 uri = "localhost"
 port = 8086
-db = "bus_arrivals"
-
+db = "bus_locations"
 
 [redis]
 host = "localhost"

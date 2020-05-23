@@ -1,13 +1,15 @@
-from pymt import logger, api, map, default_logger
-from pymt.helpers import infl, mon
-import pymt.models.oasth as model
-import time
 import datetime
+import time
 
-influx = infl.init_influxdb()
+import pymt.helpers.metadata
+import pymt.models.oasth as model
+from pymt import logger, api, map
+from pymt.helpers import infl, mon
+
+influx_client = infl.InfluxClient()
 
 
-@default_logger.timer("Getting bus telematics...")
+@pymt.helpers.metadata.timer("Getting bus telematics...")
 def get_buses(lines):
     # Get telematics
     route_telematics = api.get_async([l.get_telematics_url(day) for day in range(2) for l in lines])
@@ -34,8 +36,9 @@ def run():
 
         buses = get_buses(loaded_lines)
         [logger.debug(b.__dict__) for b in buses]
+        logger.info(f"Received {len(buses)} bus objects")
 
-        infl.save_buses(influx, buses)
+        influx_client.save_buses(buses)
 
         m = map.init_map()
         [map.plot_route(m, line, days) for line in loaded_lines]
