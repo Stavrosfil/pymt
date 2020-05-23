@@ -1,3 +1,4 @@
+import functools
 import sys
 import time
 
@@ -9,38 +10,68 @@ from pymt import logger, config
 
 _influx_uri = config['influxdb']['uri']
 _influx_port = config['influxdb']['port']
-_influx_db = config['influxdb']['db']
+_locations_db = config['influxdb']['db']
+_metrics_db = config['influxdb']['metrics_db']
+
+
+def init_client(uri, port, db):
+    try:
+        logger.info("Initializing InfluxDB client: {}:{}".format(uri, port))
+        influx_client = InfluxDBClient(uri, port)
+        logger.info("Client initialized successfully")
+    except Exception as e:
+        logger.exception("Failed to initialize InfluxDB client: {}".format(e))
+        sys.exit()
+
+    try:
+        dbs = influx_client.get_list_database()
+        if {'name': db} not in dbs:
+            logger.info("Creating database: {}".format(db))
+            influx_client.create_database(db)
+        logger.info("Switching to database: {}".format(db))
+        influx_client.switch_database(db)
+        logger.info("Successfully switched to: {}".format(db))
+    except Exception as e:
+        logger.exception("Could not switch to or create {}: {}".format(db, e))
+        sys.exit()
+
+    return influx_client
+
+
+metrics_client = init_client(_influx_uri, _influx_port, _metrics_db)
+
+
+def performance(measurement_name=None):
+    def inner(func):
+        @functools.wraps(func)
+        def wrapper_timer(*args, **kwargs):
+            start_time = time.perf_counter()  # 1
+            value = func(*args, **kwargs)
+            end_time = time.perf_counter()  # 2
+            run_time = end_time - start_time  # 3
+            json_body = {
+                "measurement": func.__name__,
+                # "tags": "stop",
+                "time": time.time_ns(),
+                "fields": {
+                    "time_s": run_time
+                },
+            }
+            metrics_client.write_points([json_body])
+
+            return value
+
+        return wrapper_timer
+
+    return inner
 
 
 class InfluxClient:
-    # TODO: Initialize object in a sensible way
-    client = influx_client = InfluxDBClient(_influx_uri, _influx_port)
-    client.switch_database(_influx_db)
 
     def __init__(self):
-        try:
-            logger.info("Initializing InfluxDB client: {}:{}".format(_influx_uri, _influx_port))
-            influx_client = InfluxDBClient(_influx_uri, _influx_port)
-            logger.info("Client initialized successfully")
-        except Exception as e:
-            logger.exception("Failed to initialize InfluxDB client: {}".format(e))
-            sys.exit()
+        self.client = init_client(_influx_uri, _influx_port, _locations_db)
 
-        try:
-            dbs = influx_client.get_list_database()
-            if {'name': _influx_db} not in dbs:
-                logger.info("Creating database: {}".format(_influx_db))
-                influx_client.create_database(_influx_db)
-            logger.info("Switching to database: {}".format(_influx_db))
-            influx_client.switch_database(_influx_db)
-            logger.info("Successfully switched to: {}".format(_influx_db))
-        except Exception as e:
-            logger.exception("Could not switch to or create {}: {}".format(_influx_db, e))
-            sys.exit()
-
-        self.client = influx_client
-
-    @pymt.helpers.metadata.performance(client, "run_time")
+    @performance("run_time")
     @pymt.helpers.metadata.timer("Writing to InfluxDB...")
     def save_buses(self, buses):
         json_body = []

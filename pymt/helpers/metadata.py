@@ -24,28 +24,3 @@ def timer(message=None):
         return wrapper_timer
 
     return inner
-
-
-def performance(client, measurement_name):
-    def inner(func):
-        @functools.wraps(func)
-        def wrapper_timer(*args, **kwargs):
-            start_time = time.perf_counter()  # 1
-            value = func(*args, **kwargs)
-            end_time = time.perf_counter()  # 2
-            run_time = end_time - start_time  # 3
-            json_body = {
-                "measurement": measurement_name,
-                # "tags": "stop",
-                "time": time.time_ns(),
-                "fields": {
-                    "time_s": run_time
-                },
-            }
-            client.write_points([json_body])
-
-            return value
-
-        return wrapper_timer
-
-    return inner

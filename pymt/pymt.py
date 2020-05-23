@@ -1,6 +1,7 @@
 import datetime
 import time
 
+import pymt.helpers.infl
 import pymt.helpers.metadata
 import pymt.models.oasth as model
 from pymt import logger, api, map
@@ -9,6 +10,7 @@ from pymt.helpers import infl, mon
 influx_client = infl.InfluxClient()
 
 
+@pymt.helpers.infl.performance(influx_client)
 @pymt.helpers.metadata.timer("Getting bus telematics...")
 def get_buses(lines):
     # Get telematics
