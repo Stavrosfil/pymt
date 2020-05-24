@@ -10,7 +10,7 @@ from pymt.helpers import infl, mon
 influx_client = infl.InfluxClient()
 
 
-@pymt.helpers.infl.performance(influx_client)
+@pymt.helpers.infl.performance(prefix="pymt")
 @pymt.helpers.metadata.timer("Getting bus telematics...")
 def get_buses(lines):
     routes = [l.get_telematics_url(day) for day in range(2) for l in lines if day != 0]

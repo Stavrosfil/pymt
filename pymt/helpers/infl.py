@@ -41,7 +41,7 @@ def init_client(uri, port, db):
 metrics_client = init_client(_influx_uri, _influx_port, _metrics_db)
 
 
-def performance(measurement_name=None):
+def performance(measurement_name=None, prefix=None):
     def inner(func):
         @functools.wraps(func)
         def wrapper_timer(*args, **kwargs):
@@ -49,8 +49,12 @@ def performance(measurement_name=None):
             value = func(*args, **kwargs)
             end_time = time.perf_counter()  # 2
             run_time = end_time - start_time  # 3
+            if measurement_name is None:
+                mn = func.__name__
+            else:
+                mn = measurement_name
             json_body = {
-                "measurement": func.__name__,
+                "measurement": f"{prefix}.{mn}" if prefix is not None else mn,
                 # "tags": "stop",
                 "time": time.time_ns(),
                 "fields": {
@@ -71,7 +75,7 @@ class InfluxClient:
     def __init__(self):
         self.client = init_client(_influx_uri, _influx_port, _locations_db)
 
-    @performance("run_time")
+    @performance(prefix="influx")
     @pymt.helpers.metadata.timer("Writing to InfluxDB...")
     def save_buses(self, buses):
         json_body = []
