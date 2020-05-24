@@ -1,13 +1,14 @@
 [pymt]
 #selected_lines = ["01N", "01X", "02K", "03K", "10", "07", "31"]
-selected_lines = ["01Χ", "01N", "02Κ", "58", "07", "31", "27"]
-#selected_lines = []
+#selected_lines = ["01Χ", "01N", "02Κ", "58", "07", "31", "27"]
+selected_lines = []
+log_level = "INFO"
 
 [influxdb]
 uri = "localhost"
 port = 8086
-db = "bus_arrivals"
-
+db = "oasth_locations"
+metrics_db = "oasth_metrics"
 
 [redis]
 host = "localhost"

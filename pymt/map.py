@@ -1,4 +1,6 @@
 import folium
+
+import pymt.helpers.metadata
 from pymt import config, default_logger
 
 
@@ -10,7 +12,7 @@ class Conf(object):
 c = Conf(config['map'])
 
 
-@default_logger.timer()
+@pymt.helpers.metadata.timer()
 def init_map():
     m = folium.Map(location=c.initial_location, tiles=c.map_styles[c.default_style],
                    zoom_start=c.initial_zoom)

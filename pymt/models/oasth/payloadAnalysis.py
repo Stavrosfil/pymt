@@ -1,8 +1,7 @@
-from pprint import pprint
-
-import requests
 import zlib
 from ast import literal_eval as make_tuple
+
+import requests
 from pymongo import MongoClient
 
 lines = {}
