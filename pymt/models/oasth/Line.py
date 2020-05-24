@@ -6,6 +6,6 @@ class Line(object):
 
     def get_telematics_url(self, day=0):
         if self.days:
-            return "http://oasth.gr/el/api/getBusLocation/{}/?a=1".format(self.days[day])
-        else:
-            return None
+            if self.days[day] != 0:
+                return "http://oasth.gr/el/api/getBusLocation/{}/?a=1".format(self.days[day])
+        return None

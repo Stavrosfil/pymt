@@ -1,6 +1,9 @@
 from pymongo import MongoClient
-from pymt import config, selected_lines, default_logger, logger
+
+import pymt.helpers.infl
+import pymt.helpers.metadata
 import pymt.models.oasth as model
+from pymt import config, selected_lines, logger
 
 c = config['mongodb']
 
@@ -15,6 +18,7 @@ route_stops_db = db[c['route_stops_db']]
 
 
 # TODO: fix encoding in route names
+@pymt.helpers.infl.performance(prefix="mongo")
 def get_route_stops(route_id):
     # line = lines_db.find_one(dict(name=name))
     # route = line.get('days')[0]
@@ -33,7 +37,8 @@ def get_all_lines():
     return [model.Line(l) for l in lines_db.find()]
 
 
-@default_logger.timer("Loading selected lines from MongoDB")
+@pymt.helpers.infl.performance(prefix="mongo")
+@pymt.helpers.metadata.timer("Loading selected lines from MongoDB")
 def load_lines(days, lines=selected_lines):
     _lines = []
     if not lines:

@@ -1,23 +1,28 @@
-from pymt import logger, api, map, default_logger
-from pymt.helpers import infl, mon
-import pymt.models.oasth as model
-import time
 import datetime
+import time
 
-influx = infl.init_influxdb()
+import pymt.helpers.infl
+import pymt.helpers.metadata
+import pymt.models.oasth as model
+from pymt import logger, api, map
+from pymt.helpers import infl, mon
+
+influx_client = infl.InfluxClient()
 
 
-@default_logger.timer("Getting bus telematics...")
+@pymt.helpers.infl.performance(prefix="pymt")
+@pymt.helpers.metadata.timer("Getting bus telematics...")
 def get_buses(lines):
-    # Get telematics
-    route_telematics = api.get_async([l.get_telematics_url(day) for day in range(2) for l in lines])
+    routes = [y for day in range(2) for l in lines if (y := l.get_telematics_url(day)) is not None]
+    logger.warning(f"Route urls to request: {len(routes)}")
+    route_telematics = api.get_async(routes)
     return [model.Bus(b) for route in route_telematics for b in route if b]
 
 
 def run():
     today = datetime.datetime.today().weekday()
     days = [today * 2, today * 2 + 1]
-    logger.debug(days)
+    logger.info(f"Days: {days}")
     loaded_lines = mon.load_lines(days)
 
     while True:
@@ -26,6 +31,7 @@ def run():
         if new_day != today:
             days = [new_day * 2, new_day * 2 + 1]
             loaded_lines = mon.load_lines(days)
+            logger.warning(f"Days: {days}")
 
         for l in loaded_lines:
             logger.debug("Line: {}".format(l.name))
@@ -34,8 +40,9 @@ def run():
 
         buses = get_buses(loaded_lines)
         [logger.debug(b.__dict__) for b in buses]
+        logger.info(f"Received {len(buses)} bus objects")
 
-        infl.save_buses(influx, buses)
+        influx_client.save_buses(buses)
 
         m = map.init_map()
         [map.plot_route(m, line, days) for line in loaded_lines]

@@ -1,6 +1,4 @@
 import logging
-import time
-import functools
 
 
 class bcolors:
@@ -14,47 +12,28 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-# c_format = f_format = logging.Formatter('%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s')
-# c_format = f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
-c_format = f_format = logging.Formatter(f'{bcolors.WARNING}[%(levelname)s] {bcolors.HEADER}- %(message)s')
+def init_logger():
+    # c_format = f_format = logging.Formatter('%(asctime)s - %(process)d - %(levelname)s - %(name)s - %(message)s')
+    # c_format = f_format = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+    c_format = f_format = logging.Formatter(f'{bcolors.WARNING}[%(levelname)s] {bcolors.HEADER}- %(message)s')
 
-# Create a custom logger
-logger = logging.getLogger(__name__)
+    # Create a custom logger
+    logger = logging.getLogger(__name__)
 
-# Create handlers
-c_handler = logging.StreamHandler()
-f_handler = logging.FileHandler('pymt.log')
+    # Create handlers
+    c_handler = logging.StreamHandler()
+    f_handler = logging.FileHandler('pymt.log')
 
-# Set severity logging level
-logger.setLevel(logging.DEBUG)
-f_handler.setLevel(logging.WARNING)
+    # Set severity logging level
+    logger.setLevel(logging.DEBUG)
+    f_handler.setLevel(logging.WARNING)
 
-# Create formatters and add it to handlers
-c_handler.setFormatter(c_format)
-f_handler.setFormatter(f_format)
+    # Create formatters and add it to handlers
+    c_handler.setFormatter(c_format)
+    f_handler.setFormatter(f_format)
 
-# Add handlers to the logger
-logger.addHandler(c_handler)
-logger.addHandler(f_handler)
+    # Add handlers to the logger
+    logger.addHandler(c_handler)
+    logger.addHandler(f_handler)
 
-
-def timer(message=None):
-    """Print the runtime of the decorated function"""
-
-    def inner(func):
-        @functools.wraps(func)
-        def wrapper_timer(*args, **kwargs):
-            if message:
-                logger.info("[{}]: {}".format(func.__name__, message))
-            else:
-                logger.info("[{}]: Running...".format(func.__name__))
-            start_time = time.perf_counter()  # 1
-            value = func(*args, **kwargs)
-            end_time = time.perf_counter()  # 2
-            run_time = end_time - start_time  # 3
-            logger.info(f"[{func.__name__}]: Finished in {run_time:.4f} secs")
-            return value
-
-        return wrapper_timer
-
-    return inner
+    return logger
