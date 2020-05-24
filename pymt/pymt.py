@@ -13,7 +13,7 @@ influx_client = infl.InfluxClient()
 @pymt.helpers.infl.performance(prefix="pymt")
 @pymt.helpers.metadata.timer("Getting bus telematics...")
 def get_buses(lines):
-    routes = [l.get_telematics_url(day) for day in range(2) for l in lines if day != 0]
+    routes = [y for day in range(2) for l in lines if (y := l.get_telematics_url(day)) is not None]
     logger.warning(f"Route urls to request: {len(routes)}")
     route_telematics = api.get_async(routes)
     return [model.Bus(b) for route in route_telematics for b in route if b]
