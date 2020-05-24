@@ -102,7 +102,6 @@ class InfluxClient:
     def batch_start(self, number):
         json_body = {
             "measurement": "batch_start",
-            # "tags": "start",
             "time": time.time_ns(),
             "fields": {
                 "buses": number
@@ -113,22 +112,12 @@ class InfluxClient:
     def batch_end(self, number):
         json_body = {
             "measurement": "batch_stop",
-            # "tags": "stop",
             "time": time.time_ns(),
             "fields": {
                 "number": number,
             },
         }
         self.write_json([json_body])
-
-    # def performance(self, measurement_name, run_time):
-    #     json_body = {
-    #         "measurement": measurement_name,
-    #         # "tags": "stop",
-    #         "time": time.time_ns(),
-    #         "fields": run_time,
-    #     }
-    #     self.write_json(json_body)
 
     def write_json(self, json_body):
         if not isinstance(json_body, list):

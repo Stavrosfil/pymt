@@ -1,7 +1,7 @@
 import functools
 import time
 
-from pymt.default_logger import logger
+from pymt import logger
 
 
 def timer(message=None):
@@ -18,7 +18,7 @@ def timer(message=None):
             value = func(*args, **kwargs)
             end_time = time.perf_counter()  # 2
             run_time = end_time - start_time  # 3
-            logger.info(f"[{func.__name__}]: Finished in {run_time:.4f} secs")
+            logger.info(f"[{func.__name__}]: Finished @ {run_time:.4f} secs")
             return value
 
         return wrapper_timer
