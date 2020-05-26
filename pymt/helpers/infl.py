@@ -99,26 +99,24 @@ class InfluxClient:
                     }
                 )
 
-        self.batch_start(len(buses))
         self.write_json(json_body)
-        self.batch_end(len(buses))
 
-    def batch_start(self, number):
+    def batch_start(self, requests):
         json_body = {
             "measurement": "batch_start",
             "time": time.time_ns(),
             "fields": {
-                "buses": number
+                "requests": requests,
             }
         }
         self.write_json([json_body])
 
-    def batch_end(self, number):
+    def batch_end(self, buses):
         json_body = {
             "measurement": "batch_stop",
             "time": time.time_ns(),
             "fields": {
-                "number": number,
+                "buses": buses,
             },
         }
         self.write_json([json_body])
