@@ -1,13 +1,13 @@
 # pymt
 
-![](/assets/dashboard2.png)
+![dashboard](https://user-images.githubusercontent.com/6664730/101485340-afdd6600-3963-11eb-9962-8c07e575fde6.png)
 
 _Disclaimer: The project is a WIP, so please report any inaccuracies, errors or problems occur, and feel free to open an issue._
 
 ## Python mass-transport.
 
-It is a common fact that many mass transport companies do not have a publicly available `API` for their `telematics`, but offer it in their various websites.
-Pymt is a Python module built to `scrape` means of mass transport telematics webpages on will.
+Pymt is a tool aiming to make means of mass transportation provisioning available to anyone using the underlying `API` for their `telematics` all in one dashboard.
+Pymt is a Python module built to `scrape` means of mass transport telematics webpages on will, and then analyze said data and make simple predictions on usage, frequency and occupancy.
 
 It aims to be as modular as possible and offer different modules for various mmt companies. The user can then request the specific telematics from those.
 
@@ -15,12 +15,10 @@ The final result is a combination of many platforms for different needs, such as
 
 ## Support
 
-It currently only supports OASTH, a Thessaloniki-based bus company, which the module was initialy built for. We hope to support more in the future with the help of various people that need it. There really is a need for an open source solution for this problem.
+It currently only supports `OASTh`, a Thessaloniki-based bus company, which the module was initialy built for. We hope to support more in the future.
 
-## Standard
+## Installation and Usage
 
-The goal is to standardize a module, for every one of them to have the same structure and functionality. The goal is to make the system plug-and-play, and for developers to use it effortlessly. 
-
-e.g: `get_stop_arivals()` will return a list of every bus name and arival time corresponds to a bus stop given.
+Documentation is on the TODO list and is a also a work in progress.
 
 _Documentation is also a WIP, and is planned to be updated soon. At this point, some of it might be inaccurate as the project takes shape and is not in its final form!_
